@@ -1,0 +1,28 @@
+{% extends 'twitter/layout.html' %}
+{% load humanize %}
+{% block content %}
+<div class="container mt-4">
+  <!-- Formulario de búsqueda -->
+  <form method="get" action="{% url 'buscar_usuarios' %}" class="form-inline my-2">
+    <input class="form-control mr-sm-2 w-75" type="search" placeholder="Buscar usuarios..." name="q" value="{{ query }}" aria-label="Buscar">
+    <button class="btn btn-outline-success my-2 my-sm-0" style="background-color: #383c44; color: white;" type="submit">Buscar</button>
+  </form>
+
+  <h2 class="mt-4">Resultados para: "{{ query }}"</h2>
+  
+  {% if usuarios %}
+    <ul class="list-group">
+      {% for usuario in usuarios %}
+        <li class="list-group-item d-flex align-items-center">
+          <img src="{{ usuario.profiles.image.url }}" alt="{{ usuario.first_name }}" class="rounded-circle mr-3" style="width:40px;">
+          <a href="{% url 'profile' usuario %}">
+            {{ usuario.first_name }} {{ usuario.last_name }} (@{{ usuario.username }})
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No se encontraron usuarios que coincidan con tu búsqueda.</p>
+  {% endif %}
+</div>
+{% endblock content %}

@@ -1,0 +1,83 @@
+{% extends 'twitter/layout.html' %}
+{% load humanize %}
+{% block content %}
+<style>
+  /* Animación tracking-in-contract para el título */
+  @-webkit-keyframes tracking-in-contract {
+    0% {
+      letter-spacing: 1em;
+      opacity: 0;
+    }
+    40% {
+      opacity: 0.6;
+    }
+    100% {
+      letter-spacing: normal;
+      opacity: 1;
+    }
+  }
+  @keyframes tracking-in-contract {
+    0% {
+      letter-spacing: 1em;
+      opacity: 0;
+    }
+    40% {
+      opacity: 0.6;
+    }
+    100% {
+      letter-spacing: normal;
+      opacity: 1;
+    }
+  }
+  h1.page-title {
+    animation: tracking-in-contract 1s ease-out both;
+    text-align: center;
+    margin-top: 20px;
+    color: #343a40;
+  }
+  /* Estilos para las tarjetas de menciones */
+  .mention-card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    transition: transform 0.2s ease-in-out;
+  }
+  .mention-card:hover {
+    transform: scale(1.02);
+  }
+  .mention-card blockquote {
+    font-style: italic;
+    margin-bottom: 0;
+    border-left: 4px solid #dee2e6;
+    padding-left: 10px;
+  }
+</style>
+
+<div class="container mt-4">
+  <h1 class="page-title">Mis Menciones</h1>
+  
+  {% if mentions %}
+    <div class="row">
+      {% for mention in mentions %}
+        <div class="col-md-6">
+          <div class="card mention-card">
+            <div class="card-body">
+              <p>
+                Fuiste mencionado en el post de 
+                <a href="{% url 'profile' mention.post.user.username %}">
+                  {{ mention.post.user.username }}
+                </a>:
+              </p>
+              <blockquote class="mb-2">"{{ mention.post.content }}"</blockquote>
+              <small class="text-muted">{{ mention.timestamp|naturaltime }}</small>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center">No tienes menciones.</p>
+  {% endif %}
+</div>
+{% endblock %}
