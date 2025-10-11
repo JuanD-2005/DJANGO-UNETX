@@ -1,0 +1,46 @@
+{% extends 'twitter/layout.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Bandeja de Entrada</h2>
+  <div class="row">
+    <!-- Mensajes Recibidos -->
+    <div class="col-md-6">
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header" style="background-color: #383c44; color: white;">
+            <h4 class="mb-0">Mensajes Recibidos</h4>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for msg in messages_received %}
+            <li class="list-group-item">
+              <strong>{{ msg.sender.username }}</strong>: {{ msg.content }}<br>
+              <small class="text-muted">{{ msg.timestamp }}</small>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-center">No tienes mensajes recibidos.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <!-- Mensajes Enviados -->
+    <div class="col-md-6">
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h4 class="mb-0">Mensajes Enviados</h4>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for msg in messages_sent %}
+            <li class="list-group-item">
+              Para <strong>{{ msg.receiver.username }}</strong>: {{ msg.content }}<br>
+              <small class="text-muted">{{ msg.timestamp }}</small>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-center">No has enviado mensajes.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
