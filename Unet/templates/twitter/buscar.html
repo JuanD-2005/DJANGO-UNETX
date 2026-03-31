@@ -14,7 +14,7 @@
     <ul class="list-group">
       {% for usuario in usuarios %}
         <li class="list-group-item d-flex align-items-center">
-          <img src="{{ usuario.profiles.image.url }}" alt="{{ usuario.first_name }}" class="rounded-circle mr-3" style="width:40px;">
+          <img src="{{ usuario.profile.image.url }}" alt="{{ usuario.first_name }}" class="rounded-circle mr-3" style="width:40px;">
           <a href="{% url 'profile' usuario %}">
             {{ usuario.first_name }} {{ usuario.last_name }} (@{{ usuario.username }})
           </a>

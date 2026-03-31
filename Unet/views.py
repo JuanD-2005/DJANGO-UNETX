@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import Profiles, Post, Relationship, DirectMessage,  Mention
+from .models import Profile, Post, Relationship, DirectMessage,  Mention
 from .forms import UserRegisterForm, PostForm, ProfileUpdateForm, UserUpdateForm
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -134,7 +134,7 @@ def profile(request, username):
 @login_required
 def editar(request):
     # Asegurarse de que el usuario tenga un perfil (si no, se crea)
-    profile, created = Profiles.objects.get_or_create(user=request.user)
+    profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)

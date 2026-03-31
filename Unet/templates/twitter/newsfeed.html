@@ -8,14 +8,14 @@
             <div class="card" style="width: 18rem; text-align:center; border-radius: 20px;">
                 <img class="card-img-top rounded-circle"
                      style="width:60%; position: relative; left: 62px; padding-top: 20px;"
-                     src="{{ request.user.profiles.image.url }}" alt="Card image cap">
+                     src="{{ request.user.profile.image.url }}" alt="Card image cap">
                 <div class="card-body">
                     <h5 class="card-title font-weight-bold">{{ request.user.first_name }}</h5>    
                     <h6 class="card-title font-weight-bold">@{{ request.user }}</h6>
-                    <p class="card-text">{{ request.user.profiles.bio }}</p>
+                    <p class="card-text">{{ request.user.profile.bio }}</p>
                     <h6 class="card-title font-weight-bold">
-                        {{ request.user.profiles.followers.count }} Followers
-                        {{ request.user.profiles.following.count }} Following
+                        {{ request.user.profile.followers.count }} Followers
+                        {{ request.user.profile.following.count }} Following
                     </h6>
                     <a href="{% url 'profile' request.user %}" class="btn text-white rounded-pill" style="background-color: #383c44; color: white;">Mi perfil</a>
                 </div>
@@ -33,7 +33,7 @@
             <div class="d-flex">
                 <div class="col-xs">
                     <!-- Image form -->
-                    <img src="{{ request.user.profiles.image.url }}" alt=""
+                    <img src="{{ request.user.profile.image.url }}" alt=""
                          class="avator">
                 </div>
                 <!-- Formulario -->
@@ -64,7 +64,7 @@
             <div class="tweet-wrap" style="border-radius:20px">
                 <!-- Contenido del post -->
                 <div class="tweet-header">
-                    <img src="{{ post.user.profiles.image.url }}" alt="" class="avator">
+                    <img src="{{ post.user.profile.image.url }}" alt="" class="avator">
                     <div class="tweet-header-info">
                         <a href="{% url 'profile' post.user.username %}">
                             {{ post.user.first_name }}
