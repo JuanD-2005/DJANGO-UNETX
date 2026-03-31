@@ -1,46 +1,107 @@
 {% extends 'twitter/layout.html' %}
+{% load humanize %}
+
+{% block title %}Bandeja de entrada{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <h2 class="mb-4 text-center">Bandeja de Entrada</h2>
-  <div class="row">
-    <!-- Mensajes Recibidos -->
-    <div class="col-md-6">
-      <div class="card mb-4 shadow-sm">
-        <div class="card-header" style="background-color: #383c44; color: white;">
-            <h4 class="mb-0">Mensajes Recibidos</h4>
-        </div>
-        <ul class="list-group list-group-flush">
-          {% for msg in messages_received %}
-            <li class="list-group-item">
-              <strong>{{ msg.sender.username }}</strong>: {{ msg.content }}<br>
-              <small class="text-muted">{{ msg.timestamp }}</small>
-            </li>
-          {% empty %}
-            <li class="list-group-item text-center">No tienes mensajes recibidos.</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-    <!-- Mensajes Enviados -->
-    <div class="col-md-6">
-      <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-success text-white">
-          <h4 class="mb-0">Mensajes Enviados</h4>
-        </div>
-        <ul class="list-group list-group-flush">
-          {% for msg in messages_sent %}
-            <li class="list-group-item">
-              Para <strong>{{ msg.receiver.username }}</strong>: {{ msg.content }}<br>
-              <small class="text-muted">{{ msg.timestamp }}</small>
-            </li>
-          {% empty %}
-            <li class="list-group-item text-center">No has enviado mensajes.</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}
+<div class="container mt-5" style="max-width:900px;">
+    <h2 class="mb-4 text-center font-weight-bold">📥 Bandeja de Entrada</h2>
 
+    <div class="row">
+
+        {# ════════════════════════════════════ MENSAJES RECIBIDOS ══════════ #}
+        {# InboxView es un ListView con paginate_by=25.                       #}
+        {# context_object_name = 'messages_received' → objetos paginados.    #}
+        {# page_obj → controles de paginación.                               #}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header text-white font-weight-bold"
+                     style="background-color:#383c44;">
+                    Recibidos
+                    {% if page_obj.paginator.count %}
+                    <span class="badge badge-light ml-1">
+                        {{ page_obj.paginator.count }}
+                    </span>
+                    {% endif %}
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for msg in messages_received %}
+                    <li class="list-group-item">
+                        <div class="d-flex align-items-center mb-1">
+                            <img src="{{ msg.sender.profile.image.url }}"
+                                 class="rounded-circle mr-2"
+                                 style="width:32px; height:32px; object-fit:cover;"
+                                 alt="{{ msg.sender.username }}">
+                            <a href="{% url 'profile' msg.sender.username %}"
+                               class="font-weight-bold"
+                               style="color:#383c44; text-decoration:none;">
+                                @{{ msg.sender.username }}
+                            </a>
+                            {% if not msg.is_read %}
+                            <span class="badge badge-primary ml-auto">Nuevo</span>
+                            {% endif %}
+                        </div>
+                        <p class="mb-1 ml-4">{{ msg.content }}</p>
+                        <small class="text-muted ml-4">
+                            {{ msg.timestamp|naturaltime }}
+                        </small>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-center text-muted py-4">
+                        No tienes mensajes recibidos.
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {# Paginación de mensajes recibidos #}
+            {% include "twitter/_pagination.html" with page_obj=page_obj %}
+        </div>
+
+        {# ════════════════════════════════════ MENSAJES ENVIADOS ═══════════ #}
+        {# messages_sent se carga en get_context_data con un slice [:25].    #}
+        {# No tiene paginación propia (los enviados son secundarios en UX).  #}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header text-white font-weight-bold bg-success">
+                    Enviados
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for msg in messages_sent %}
+                    <li class="list-group-item">
+                        <div class="d-flex align-items-center mb-1">
+                            <img src="{{ msg.receiver.profile.image.url }}"
+                                 class="rounded-circle mr-2"
+                                 style="width:32px; height:32px; object-fit:cover;"
+                                 alt="{{ msg.receiver.username }}">
+                            <span class="text-muted small">Para</span>
+                            <a href="{% url 'profile' msg.receiver.username %}"
+                               class="font-weight-bold ml-1"
+                               style="color:#383c44; text-decoration:none;">
+                                @{{ msg.receiver.username }}
+                            </a>
+                        </div>
+                        <p class="mb-1 ml-4">{{ msg.content }}</p>
+                        <small class="text-muted ml-4">
+                            {{ msg.timestamp|naturaltime }}
+                        </small>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-center text-muted py-4">
+                        No has enviado mensajes.
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="text-center mt-2">
+        <a href="{% url 'send_message' %}" class="btn text-white"
+           style="background-color:#383c44; border-radius:20px;">
+            ✉️ Enviar nuevo mensaje
+        </a>
+    </div>
+
+</div>
+{% endblock content %}

@@ -1,11 +1,17 @@
+{% extends 'twitter/layout.html' %}
 {% load static %}
-{% block head %}
-<link rel="shortcut icon" href="{% static 'img/tab-icons.png' %}" type="image/x-icon">
-{% endblock %}
+
+{% block title %}Iniciar sesión{% endblock %}
+
+{# ─────────────────────────────────────────────────────────────────────────── #}
+{# login.html                                                                  #}
+{# CAMBIO: ahora extiende layout.html para heredar el bloque de messages y    #}
+{# los scripts de Bootstrap. El template original tenía su propio <body> con  #}
+{# clase login-page — conservamos el estilo visual pero dentro del layout.    #}
+{# ─────────────────────────────────────────────────────────────────────────── #}
 
 {% block content %}
 <style>
-  /* Variables de colores para mantener consistencia */
   :root {
     --primary-color: #1da1f2;
     --primary-hover: #0d95e8;
@@ -13,253 +19,104 @@
     --text-light: #657786;
     --border-color: #ccd6dd;
     --background-color: #f5f8fa;
-    --white: #ffffff;
     --error-color: #e0245e;
-    --shadow-light: 0 2px 8px rgba(0,0,0,0.1);
     --shadow-medium: 0 4px 12px rgba(0,0,0,0.15);
   }
-
-  /* Estilos generales para la página de login */
-  body.login-page {
-    background: var(--background-color);
+  .login-wrap {
+    min-height: calc(100vh - 60px);
     display: flex;
-    justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    position: relative;
-    overflow: hidden;
+    justify-content: center;
+    background: var(--background-color);
+    padding: 2rem 1rem;
   }
-  
-  /* Fondo decorativo sutil */
-  body.login-page::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(29, 161, 242, 0.03) 0%, rgba(255, 255, 255, 0) 70%);
-    z-index: -1;
-  }
-
-  /* Contenedor central del login */
   .login-container {
-    background: var(--white);
+    background: #fff;
     border-radius: 12px;
     box-shadow: var(--shadow-medium);
     padding: 40px 35px;
-    max-width: 420px;
     width: 100%;
-    position: relative;
-    z-index: 1;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 420px;
+    transition: transform .3s ease, box-shadow .3s ease;
   }
-  
   .login-container:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
   }
-
-  /* Header del login */
-  .login-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
+  .login-header { text-align:center; margin-bottom:30px; }
   .login-logo {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 15px;
-    border-radius: 50%;
-    object-fit: cover;
-    box-shadow: var(--shadow-light);
-    transition: transform 0.3s ease;
+    width:80px; height:80px; border-radius:50%; object-fit:cover;
+    margin-bottom:15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   }
-  .login-logo:hover {
-    transform: scale(1.05);
-  }
-  .login-title {
-    font-size: 28px;
-    color: var(--text-dark);
-    margin-bottom: 8px;
-    font-weight: 700;
-  }
-  .login-subtitle {
-    font-size: 14px;
-    color: var(--text-light);
-    margin-top: 0;
-  }
-
-  /* Estilos de los inputs y etiquetas */
-  .input-wrapper {
-    margin-bottom: 24px;
-    position: relative;
-  }
+  .login-title { font-size:28px; font-weight:700; color:var(--text-dark); }
+  .login-subtitle { font-size:14px; color:var(--text-light); }
+  .input-wrapper { margin-bottom:20px; }
   .input-wrapper label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: var(--text-dark);
-    font-size: 14px;
-    transition: color 0.2s ease;
+    display:block; margin-bottom:8px; font-weight:600;
+    color:var(--text-dark); font-size:14px;
   }
   .input-wrapper input {
-    width: 100%;
-    padding: 14px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-sizing: border-box;
-    font-size: 15px;
-    transition: all 0.3s ease;
-    background-color: #fafbfc;
+    width:100%; padding:14px 16px; border:1px solid var(--border-color);
+    border-radius:8px; box-sizing:border-box; font-size:15px;
+    transition:all .3s ease; background:#fafbfc;
   }
   .input-wrapper input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.1);
-    background-color: var(--white);
+    outline:none; border-color:var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(29,161,242,0.1); background:#fff;
   }
-  .input-wrapper input::placeholder {
-    color: #aab8c2;
-  }
-
-  /* Mensaje de error */
-  .login-error {
-    color: var(--error-color);
-    font-size: 14px;
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    background-color: rgba(224, 36, 94, 0.05);
-    border-radius: 6px;
-    border-left: 3px solid var(--error-color);
-    display: flex;
-    align-items: center;
-  }
-  .login-error::before {
-    content: "⚠";
-    margin-right: 8px;
-    font-size: 16px;
-  }
-
-  /* Botón de login */
   .login-btn {
-    width: 100%;
-    padding: 14px;
-    background-color: var(--primary-color);
-    border: none;
-    color: var(--white);
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(29, 161, 242, 0.3);
-    margin-top: 10px;
+    width:100%; padding:14px; background:var(--primary-color);
+    border:none; color:#fff; border-radius:8px; font-size:16px;
+    font-weight:600; cursor:pointer; transition:all .3s ease;
+    box-shadow: 0 2px 4px rgba(29,161,242,0.3); margin-top:10px;
   }
   .login-btn:hover {
-    background-color: var(--primary-hover);
-    box-shadow: 0 4px 8px rgba(29, 161, 242, 0.4);
-    transform: translateY(-2px);
+    background:var(--primary-hover); transform:translateY(-2px);
+    box-shadow: 0 4px 8px rgba(29,161,242,0.4);
   }
-  .login-btn:active {
-    transform: translateY(0);
-  }
-
-  /* Footer del login */
   .login-footer {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 14px;
-    padding-top: 20px;
-    border-top: 1px solid #e6ecf0;
+    text-align:center; margin-top:25px; font-size:14px;
+    padding-top:20px; border-top:1px solid #e6ecf0;
   }
-  .login-link {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s ease;
-    position: relative;
-  }
-  .login-link:hover {
-    color: var(--primary-hover);
-    text-decoration: none;
-  }
-  .login-link::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -2px;
-    left: 0;
-    background-color: var(--primary-color);
-    transition: width 0.3s ease;
-  }
-  .login-link:hover::after {
-    width: 100%;
-  }
-  .separator {
-    margin: 0 12px;
-    color: var(--text-light);
-  }
-
-  /* Estilo para recordar usuario (opcional) */
-  .remember-me {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    font-size: 14px;
-    color: var(--text-light);
-  }
-  .remember-me input {
-    margin-right: 8px;
-  }
-
-  /* Responsive */
-  @media (max-width: 480px) {
-    .login-container {
-      padding: 30px 20px;
-      margin: 0 15px;
-    }
-    .login-title {
-      font-size: 24px;
-    }
-  }
+  .login-link { color:var(--primary-color); text-decoration:none; font-weight:500; }
+  .login-link:hover { color:var(--primary-hover); text-decoration:underline; }
 </style>
 
-<body class="login-page">
+<div class="login-wrap">
   <div class="login-container">
     <header class="login-header">
-      <img class="login-logo" src="{% static 'img/tab-icons.png' %}" alt="App Icon">
+      <img class="login-logo" src="{% static 'img/tab-icons.png' %}" alt="UnetX">
       <h1 class="login-title">Inicia Sesión</h1>
       <p class="login-subtitle">Accede a tu cuenta para continuar</p>
     </header>
 
     <form method="post">
       {% csrf_token %}
-      <div class="input-wrapper">
-        <label for="user-name-id">Usuario</label>
-        {{ form.username }}
-      </div>
 
       <div class="input-wrapper">
-        <label for="password-id">Contraseña</label>
+        <label>Usuario</label>
+        {{ form.username }}
+      </div>
+      <div class="input-wrapper">
+        <label>Contraseña</label>
         {{ form.password }}
       </div>
-      
+
+      {# Errores del formulario de autenticación de Django #}
       {% if form.errors %}
-        <p class="login-error">Usuario o contraseña incorrectos</p>
+      <div class="alert alert-danger py-2 small" role="alert">
+        ⚠️ Usuario o contraseña incorrectos. Inténtalo de nuevo.
+      </div>
       {% endif %}
-      
+
       <button type="submit" class="login-btn">Iniciar Sesión</button>
     </form>
 
- <div class="login-footer">
-  <a href="#" class="login-link">¿Olvidaste tu contraseña?</a>
-  <span class="separator">·</span>
-  <a href="{% url 'register' %}" class="login-link">Regístrate</a>
-</div>
-
+    <div class="login-footer">
+      <a href="#" class="login-link">¿Olvidaste tu contraseña?</a>
+      <span class="mx-2 text-muted">·</span>
+      <a href="{% url 'register' %}" class="login-link">Regístrate</a>
+    </div>
   </div>
-</body>
+</div>
 {% endblock content %}

@@ -1,83 +1,69 @@
 {% extends 'twitter/layout.html' %}
 {% load humanize %}
-{% block content %}
-<style>
-  /* Animación tracking-in-contract para el título */
-  @-webkit-keyframes tracking-in-contract {
-    0% {
-      letter-spacing: 1em;
-      opacity: 0;
-    }
-    40% {
-      opacity: 0.6;
-    }
-    100% {
-      letter-spacing: normal;
-      opacity: 1;
-    }
-  }
-  @keyframes tracking-in-contract {
-    0% {
-      letter-spacing: 1em;
-      opacity: 0;
-    }
-    40% {
-      opacity: 0.6;
-    }
-    100% {
-      letter-spacing: normal;
-      opacity: 1;
-    }
-  }
-  h1.page-title {
-    animation: tracking-in-contract 1s ease-out both;
-    text-align: center;
-    margin-top: 20px;
-    color: #343a40;
-  }
-  /* Estilos para las tarjetas de menciones */
-  .mention-card {
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    transition: transform 0.2s ease-in-out;
-  }
-  .mention-card:hover {
-    transform: scale(1.02);
-  }
-  .mention-card blockquote {
-    font-style: italic;
-    margin-bottom: 0;
-    border-left: 4px solid #dee2e6;
-    padding-left: 10px;
-  }
-</style>
 
-<div class="container mt-4">
-  <h1 class="page-title">Mis Menciones</h1>
-  
-  {% if mentions %}
-    <div class="row">
-      {% for mention in mentions %}
-        <div class="col-md-6">
-          <div class="card mention-card">
-            <div class="card-body">
-              <p>
-                Fuiste mencionado en el post de 
-                <a href="{% url 'profile' mention.post.user.username %}">
-                  {{ mention.post.user.username }}
-                </a>:
-              </p>
-              <blockquote class="mb-2">"{{ mention.post.content }}"</blockquote>
-              <small class="text-muted">{{ mention.timestamp|naturaltime }}</small>
+{% block title %}Mis menciones{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width:800px;">
+
+    <h2 class="text-center mb-4 font-weight-bold">
+        🔔 Mis Menciones
+        {% if page_obj.paginator.count %}
+        <span class="badge badge-secondary" style="font-size:0.8rem;">
+            {{ page_obj.paginator.count }}
+        </span>
+        {% endif %}
+    </h2>
+
+    {# MentionsView es un ListView con paginate_by=20.              #}
+    {# 'mentions' = objetos de la página actual (context_object_name) #}
+    {# select_related resolvió Mention→Post→User→Profile en 1 JOIN  #}
+    {# sin queries extra aquí.                                       #}
+    {% if mentions %}
+    <div class="list-group mb-3">
+        {% for mention in mentions %}
+        <div class="list-group-item list-group-item-action mb-2"
+             style="border-radius:8px; border-left:4px solid #383c44;">
+            <div class="d-flex align-items-center mb-2">
+                <img src="{{ mention.post.user.profile.image.url }}"
+                     class="rounded-circle mr-2"
+                     style="width:38px; height:38px; object-fit:cover;"
+                     alt="{{ mention.post.user.username }}">
+                <div>
+                    <a href="{% url 'profile' mention.post.user.username %}"
+                       class="font-weight-bold"
+                       style="color:#383c44; text-decoration:none;">
+                        @{{ mention.post.user.username }}
+                    </a>
+                    <span class="text-muted small d-block">
+                        te mencionó · {{ mention.timestamp|naturaltime }}
+                    </span>
+                </div>
             </div>
-          </div>
+            <blockquote class="mb-0 pl-3" style="border-left:3px solid #dee2e6;">
+                {{ mention.post.content }}
+            </blockquote>
+            <div class="mt-2">
+                <a href="{% url 'profile' mention.post.user.username %}"
+                   class="btn btn-sm text-white"
+                   style="background-color:#383c44; border-radius:15px;">
+                    Ver perfil
+                </a>
+            </div>
         </div>
-      {% endfor %}
+        {% endfor %}
     </div>
-  {% else %}
-    <p class="text-center">No tienes menciones.</p>
-  {% endif %}
+
+    {% include "twitter/_pagination.html" with page_obj=page_obj %}
+
+    {% else %}
+    <div class="text-center text-muted py-5">
+        <p style="font-size:3rem;">🔕</p>
+        <p>Nadie te ha mencionado todavía.</p>
+        <p class="small">Cuando alguien escriba @{{ request.user.username }} en un post,
+           aparecerá aquí.</p>
+    </div>
+    {% endif %}
+
 </div>
-{% endblock %}
+{% endblock content %}

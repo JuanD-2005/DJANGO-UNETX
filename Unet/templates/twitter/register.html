@@ -1,7 +1,10 @@
+{% extends 'twitter/layout.html' %}
 {% load static %}
+
+{% block title %}Crear cuenta{% endblock %}
+
 {% block content %}
 <style>
-  /* Variables de colores para mantener consistencia */
   :root {
     --primary-color: #1da1f2;
     --primary-hover: #0d95e8;
@@ -9,359 +12,180 @@
     --text-light: #657786;
     --border-color: #ccd6dd;
     --background-color: #f5f8fa;
-    --white: #ffffff;
     --error-color: #e0245e;
     --success-color: #17bf63;
-    --shadow-light: 0 2px 8px rgba(0,0,0,0.1);
     --shadow-medium: 0 4px 12px rgba(0,0,0,0.15);
   }
-
-  /* Estilos generales para la página de registro */
-  body.login-page {
-    background: var(--background-color);
+  .register-wrap {
+    min-height: calc(100vh - 60px);
     display: flex;
-    justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    position: relative;
-    overflow: hidden;
+    justify-content: center;
+    background: var(--background-color);
+    padding: 2rem 1rem;
   }
-  
-  /* Fondo decorativo sutil */
-  body.login-page::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(29, 161, 242, 0.03) 0%, rgba(255, 255, 255, 0) 70%);
-    z-index: -1;
-  }
-
-  /* Contenedor principal del registro */
-  .twitter-login-box {
-    background: var(--white);
+  .register-box {
+    background: #fff;
     border-radius: 16px;
     box-shadow: var(--shadow-medium);
     padding: 40px;
-    max-width: 480px;
     width: 100%;
-    position: relative;
-    z-index: 1;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 480px;
+    transition: transform .3s ease, box-shadow .3s ease;
   }
-  
-  .twitter-login-box:hover {
-    transform: translateY(-5px);
+  .register-box:hover {
+    transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
   }
-
-  /* Header del registro */
-  .twitter-login-box header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  .twitter-login-box header img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-light);
-    transition: transform 0.3s ease;
-  }
-  .twitter-login-box header img:hover {
-    transform: scale(1.05);
-  }
-  .twitter-login-box header h1 {
-    font-size: 28px;
-    color: var(--text-dark);
-    margin-bottom: 8px;
-    font-weight: 700;
-  }
-
-  /* Estilos de los inputs y etiquetas */
-  .input-wrapper {
-    margin-bottom: 20px;
-    position: relative;
-  }
+  .register-header { text-align:center; margin-bottom:30px; }
+  .register-header h1 { font-size:28px; font-weight:700; color:var(--text-dark); }
+  .input-wrapper { margin-bottom:20px; }
   .input-wrapper label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: var(--text-dark);
-    font-size: 14px;
-    transition: color 0.2s ease;
+    display:block; margin-bottom:8px; font-weight:600;
+    color:var(--text-dark); font-size:14px;
   }
   .input-wrapper input {
-    width: 100%;
-    padding: 14px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-sizing: border-box;
-    font-size: 15px;
-    transition: all 0.3s ease;
-    background-color: #fafbfc;
+    width:100%; padding:14px 16px; border:1px solid var(--border-color);
+    border-radius:8px; box-sizing:border-box; font-size:15px;
+    transition:all .3s ease; background:#fafbfc;
   }
   .input-wrapper input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.1);
-    background-color: var(--white);
+    outline:none; border-color:var(--primary-color);
+    box-shadow:0 0 0 3px rgba(29,161,242,0.1); background:#fff;
   }
-  .input-wrapper input::placeholder {
-    color: #aab8c2;
-  }
-
-  /* Indicador de fortaleza de contraseña */
   .password-strength {
-    height: 4px;
-    background-color: #e6ecf0;
-    border-radius: 2px;
-    margin-top: 8px;
-    overflow: hidden;
+    height:4px; background:#e6ecf0; border-radius:2px;
+    margin-top:8px; overflow:hidden;
   }
-  
   .password-strength-bar {
-    height: 100%;
-    width: 0%;
-    border-radius: 2px;
-    transition: width 0.3s ease, background-color 0.3s ease;
+    height:100%; width:0%; border-radius:2px;
+    transition: width .3s ease, background-color .3s ease;
   }
-  
-  .password-strength.weak .password-strength-bar {
-    width: 30%;
-    background-color: var(--error-color);
+  .strength-weak   .password-strength-bar { width:30%; background:var(--error-color); }
+  .strength-medium .password-strength-bar { width:65%; background:#ffad1f; }
+  .strength-strong .password-strength-bar { width:100%; background:var(--success-color); }
+  .error-msg {
+    color:var(--error-color); font-size:13px; margin-top:5px;
+    display:flex; align-items:center;
   }
-  
-  .password-strength.medium .password-strength-bar {
-    width: 60%;
-    background-color: #ffad1f;
+  .error-msg::before { content:"⚠ "; margin-right:4px; }
+  .register-btn {
+    width:100%; padding:14px; background:var(--primary-color);
+    border:none; color:#fff; border-radius:8px; font-size:16px;
+    font-weight:600; cursor:pointer; transition:all .3s ease;
+    box-shadow:0 2px 4px rgba(29,161,242,0.3); margin-top:10px;
   }
-  
-  .password-strength.strong .password-strength-bar {
-    width: 100%;
-    background-color: var(--success-color);
+  .register-btn:hover {
+    background:var(--primary-hover); transform:translateY(-2px);
   }
-
-  /* Mensajes de error y validación */
-  .error-message {
-    color: var(--error-color);
-    font-size: 13px;
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
+  .register-footer {
+    text-align:center; margin-top:25px; font-size:14px;
+    padding-top:20px; border-top:1px solid #e6ecf0;
   }
-  
-  .error-message::before {
-    content: "⚠";
-    margin-right: 6px;
-    font-size: 14px;
-  }
-  
-  .success-message {
-    color: var(--success-color);
-    font-size: 13px;
-    margin-top: 5px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .success-message::before {
-    content: "✓";
-    margin-right: 6px;
-    font-size: 14px;
-  }
-
-  /* Botón de registro */
-  .twitter-btn {
-    width: 100%;
-    padding: 14px;
-    background-color: var(--primary-color);
-    border: none;
-    color: var(--white);
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(29, 161, 242, 0.3);
-    margin-top: 10px;
-  }
-  .twitter-btn:hover {
-    background-color: var(--primary-hover);
-    box-shadow: 0 4px 8px rgba(29, 161, 242, 0.4);
-    transform: translateY(-2px);
-  }
-  .twitter-btn:active {
-    transform: translateY(0);
-  }
-
-  /* Footer del registro */
-  .footer {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 14px;
-    padding-top: 20px;
-    border-top: 1px solid #e6ecf0;
-  }
-  .footer a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s ease;
-    position: relative;
-  }
-  .footer a:hover {
-    color: var(--primary-hover);
-    text-decoration: none;
-  }
-  .footer a::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: -2px;
-    left: 0;
-    background-color: var(--primary-color);
-    transition: width 0.3s ease;
-  }
-  .footer a:hover::after {
-    width: 100%;
-  }
-
-  /* Términos y condiciones */
-  .terms {
-    font-size: 12px;
-    color: var(--text-light);
-    text-align: center;
-    margin-top: 20px;
-    line-height: 1.4;
-  }
-  
-  .terms a {
-    color: var(--primary-color);
-    text-decoration: none;
-  }
-  
-  .terms a:hover {
-    text-decoration: underline;
-  }
-
-  /* Responsive */
-  @media (max-width: 480px) {
-    .twitter-login-box {
-      padding: 30px 20px;
-      margin: 0 15px;
-    }
-    .twitter-login-box header h1 {
-      font-size: 24px;
-    }
-  }
+  .register-footer a { color:var(--primary-color); text-decoration:none; font-weight:500; }
+  .register-footer a:hover { text-decoration:underline; }
+  .terms { font-size:12px; color:var(--text-light); text-align:center; margin-top:20px; }
+  .terms a { color:var(--primary-color); text-decoration:none; }
 </style>
 
-<body class="login-page">
-  <div class="twitter-login-box">
-    <header>
-      <img src="https://static01.nyt.com/images/2014/08/10/magazine/10wmt/10wmt-jumbo-v4.jpg?quality=90&auto=webp"
-          alt="twitter logo">
-      <h1>Regístrate en Twitter</h1>
+<div class="register-wrap">
+  <div class="register-box">
+    <header class="register-header">
+      <h1>Únete a UnetX</h1>
     </header>
 
     <form method="POST">
       {% csrf_token %}
-      
+
       <div class="input-wrapper">
-        <label for="user-name-id">Nombre</label>
-        {{form.first_name}}
+        <label>Nombre</label>
+        {{ form.first_name }}
         {% if form.first_name.errors %}
-          <div class="error-message">{{ form.first_name.errors.0 }}</div>
+          <div class="error-msg">{{ form.first_name.errors.0 }}</div>
         {% endif %}
       </div>
-      
+
       <div class="input-wrapper">
-        <label for="user-name-id">Usuario</label>
-        {{form.username}}
+        <label>Usuario</label>
+        {{ form.username }}
         {% if form.username.errors %}
-          <div class="error-message">{{ form.username.errors.0 }}</div>
+          <div class="error-msg">{{ form.username.errors.0 }}</div>
         {% endif %}
       </div>
-      
+
       <div class="input-wrapper">
-        <label for="user-name-id">Correo electrónico</label>
-        {{form.email}}
+        <label>Correo electrónico</label>
+        {{ form.email }}
         {% if form.email.errors %}
-          <div class="error-message">{{ form.email.errors.0 }}</div>
+          <div class="error-msg">{{ form.email.errors.0 }}</div>
         {% endif %}
       </div>
-      
+
       <div class="input-wrapper">
-        <label for="password-id">Contraseña</label>
-        {{form.password1}}
-        <div class="password-strength">
+        <label>Contraseña</label>
+        {{ form.password1 }}
+        <div class="password-strength" id="pwd-strength-bar">
           <div class="password-strength-bar"></div>
         </div>
         {% if form.password1.errors %}
-          <div class="error-message">{{ form.password1.errors.0 }}</div>
-        {% endif %}
-      </div>
-      
-      <div class="input-wrapper">
-        <label for="password-id">Confirmar contraseña</label>
-        {{form.password2}}
-        {% if form.password2.errors %}
-          <div class="error-message">{{ form.password2.errors.0 }}</div>
+          <div class="error-msg">{{ form.password1.errors.0 }}</div>
         {% endif %}
       </div>
 
-      <button type="submit" class="twitter-btn">Crear cuenta</button>
+      <div class="input-wrapper">
+        <label>Confirmar contraseña</label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}
+          <div class="error-msg">{{ form.password2.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      {# Errores no ligados a un campo específico (ej: non_field_errors) #}
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger py-2 small">
+        {{ form.non_field_errors.0 }}
+      </div>
+      {% endif %}
+
+      <button type="submit" class="register-btn">Crear cuenta</button>
     </form>
 
-    <div class="terms">
-      Al registrarte, aceptas los <a href="#">Términos de servicio</a> y la <a href="#">Política de privacidad</a>, incluida la política de <a href="#">Uso de Cookies</a>.
-    </div>
+    <p class="terms">
+      Al registrarte aceptas los
+      <a href="#">Términos de servicio</a> y la
+      <a href="#">Política de privacidad</a>.
+    </p>
 
-    <div class="footer">
-      <a href="{% url 'login' %}">¿Ya tienes una cuenta? Inicia sesión</a>
+    <div class="register-footer">
+      <a href="{% url 'login' %}">¿Ya tienes cuenta? Inicia sesión</a>
     </div>
   </div>
+</div>
+{% endblock content %}
 
-  <script>
-    // Script para mostrar la fortaleza de la contraseña
-    document.addEventListener('DOMContentLoaded', function() {
-      const passwordInput = document.querySelector('input[name="password1"]');
-      const strengthBar = document.querySelector('.password-strength-bar');
-      const strengthContainer = document.querySelector('.password-strength');
-      
-      if (passwordInput && strengthBar) {
-        passwordInput.addEventListener('input', function() {
-          const password = this.value;
-          let strength = 0;
-          
-          // Evaluar fortaleza de la contraseña
-          if (password.length >= 8) strength += 1;
-          if (/[a-z]/.test(password)) strength += 1;
-          if (/[A-Z]/.test(password)) strength += 1;
-          if (/[0-9]/.test(password)) strength += 1;
-          if (/[^a-zA-Z0-9]/.test(password)) strength += 1;
-          
-          // Actualizar visualización
-          strengthContainer.className = 'password-strength';
-          if (password.length > 0) {
-            if (strength <= 2) {
-              strengthContainer.classList.add('weak');
-            } else if (strength <= 4) {
-              strengthContainer.classList.add('medium');
-            } else {
-              strengthContainer.classList.add('strong');
-            }
-          }
-        });
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const pwd = document.querySelector('input[name="password1"]');
+    const bar = document.getElementById("pwd-strength-bar");
+    if (!pwd || !bar) return;
+
+    pwd.addEventListener("input", function () {
+      const v = this.value;
+      let score = 0;
+      if (v.length >= 8)           score++;
+      if (/[a-z]/.test(v))         score++;
+      if (/[A-Z]/.test(v))         score++;
+      if (/[0-9]/.test(v))         score++;
+      if (/[^a-zA-Z0-9]/.test(v))  score++;
+
+      bar.className = "password-strength";
+      if (v.length > 0) {
+        if (score <= 2)      bar.classList.add("strength-weak");
+        else if (score <= 4) bar.classList.add("strength-medium");
+        else                 bar.classList.add("strength-strong");
       }
     });
-  </script>
-</body>
-{% endblock content %}
+  });
+</script>
+{% endblock extra_js %}
