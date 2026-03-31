@@ -1,41 +1,91 @@
 {% extends 'twitter/layout.html' %}
 
+{% block title %}Enviar mensaje{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow-sm">
-        <div class="card-header bg-info text-white">
-          <h2 class="mb-0">Enviar mensaje</h2>
+<div class="container mt-5" style="max-width:600px;">
+    <div class="card shadow-sm">
+        <div class="card-header text-white font-weight-bold"
+             style="background-color:#383c44;">
+            ✉️ Enviar mensaje directo
         </div>
         <div class="card-body">
-          <form method="POST">
-            {% csrf_token %}
-            <!-- Selección de destinatario -->
-            <div class="form-group">
-              <label for="receiver">Selecciona un usuario:</label>
-              <select name="receiver" id="receiver" class="form-control" required>
-                <option value="">-- Selecciona un usuario --</option>
-                {% for user in following_users %}
-                  <option value="{{ user.id }}">{{ user.username }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            
-            <!-- Campo de texto para el mensaje -->
-            <div class="form-group mt-3">
-              <label for="content">Mensaje:</label>
-              <textarea name="content" id="content" class="form-control" rows="4" maxlength="200" required></textarea>
-            </div>
-            
-            <div class="form-group mt-3">
-                <button type="submit" class="btn btn-primary" style="background-color: #383c44; border-color: #383c44; color: white;">Enviar</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}
 
+            {% if not following_users %}
+            {# Estado vacío: el usuario no sigue a nadie todavía. #}
+            <div class="text-center text-muted py-4">
+                <p style="font-size:2rem;">👤</p>
+                <p>Solo puedes enviar mensajes a usuarios que sigues.</p>
+                <a href="{% url 'buscar_usuarios' %}" class="btn text-white"
+                   style="background-color:#383c44; border-radius:20px;">
+                    Descubrir usuarios
+                </a>
+            </div>
+            {% else %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="receiver" class="font-weight-bold">
+                        Destinatario
+                    </label>
+                    <select name="receiver" id="receiver" class="form-control" required>
+                        <option value="">— Selecciona un usuario —</option>
+                        {% for u in following_users %}
+                        <option value="{{ u.id }}">
+                            @{{ u.username }}
+                            {% if u.first_name %}({{ u.first_name }}){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">
+                        Solo aparecen usuarios que sigues.
+                    </small>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label for="content" class="font-weight-bold">Mensaje</label>
+                    <textarea name="content" id="content" class="form-control"
+                              rows="4" maxlength="500" required
+                              placeholder="Escribe tu mensaje..."></textarea>
+                    <div class="d-flex justify-content-end">
+                        <small class="text-muted" id="dm-char-count">500 caracteres restantes</small>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="{% url 'inbox' %}"
+                       class="btn text-muted"
+                       style="border:1px solid #ccc; border-radius:20px;">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn text-white"
+                            style="background-color:#383c44; border-radius:20px;
+                                   padding-left:2rem; padding-right:2rem;">
+                        Enviar
+                    </button>
+                </div>
+            </form>
+
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const textarea = document.getElementById("content");
+    const counter = document.getElementById("dm-char-count");
+    if (!textarea || !counter) return;
+
+    textarea.addEventListener("input", function () {
+      const remaining = 500 - textarea.value.length;
+      counter.textContent = remaining + " caracteres restantes";
+      counter.style.color = remaining < 50 ? "#c0392b" : "#657786";
+    });
+  });
+</script>
+{% endblock extra_js %}

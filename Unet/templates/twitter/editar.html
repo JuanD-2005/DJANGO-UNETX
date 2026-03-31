@@ -1,44 +1,77 @@
 {% extends 'twitter/layout.html' %}
 
-{% block content %}
+{% block title %}Editar perfil{% endblock %}
 
-<div id="main" class="container-fluid d-flex">
-    <div class="">
-        <div id="inputTweetArea" class="tweet-wrap2">
-            <div class="d-flex">
-                <div class="col-xs">
-                    <!-- Image form -->
-                    <img src="{{ user.profile.image.url}}" alt="" class="avator">
-                    <!-- Formulario -->
+{% block content %}
+<div class="container mt-5" style="max-width:600px;">
+    <div class="card shadow-sm">
+        <div class="card-header text-white font-weight-bold"
+             style="background-color:#383c44;">
+            ✏️ Editar mi perfil
+        </div>
+        <div class="card-body">
+
+            {# Preview de imagen actual antes de editar #}
+            <div class="text-center mb-4">
+                <img src="{{ request.user.profile.image.url }}"
+                     alt="Foto actual"
+                     class="rounded-circle"
+                     style="width:90px; height:90px; object-fit:cover;
+                            border:3px solid #383c44;">
+                <p class="text-muted small mt-1">Foto actual</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label class="font-weight-bold">Nombre</label>
+                    {{ u_form.first_name }}
+                    {% if u_form.first_name.errors %}
+                    <div class="text-danger small mt-1">{{ u_form.first_name.errors.0 }}</div>
+                    {% endif %}
                 </div>
 
-                <!-- Formulario -->
-                <form class="col pr-0" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="input-wrapper">
-                        <label>Nombre</label>
-                        {{u_form.first_name}}
-                    </div>
-                    <div class="input-wrapper">
-                        <label for="user-name-id">Username</label>
-                        {{u_form.username}}
-                    </div>
-                    <div class="input-wrapper">
-                        <label>Bio</label>
-                        {{p_form.bio}}
-                    </div>
-                    <div class="input-wrapper">
-                        {{p_form.image}}
-                    </div>
+                <div class="form-group">
+                    <label class="font-weight-bold">Usuario</label>
+                    {{ u_form.username }}
+                    {% if u_form.username.errors %}
+                    <div class="text-danger small mt-1">{{ u_form.username.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-                    <button class="twitter-btn" style="background-color: #383c44; color: white;">Actualizar</button>
-                </form>
-                <!-- Formulario -->
+                <div class="form-group">
+                    <label class="font-weight-bold">Bio</label>
+                    {{ p_form.bio }}
+                    {% if p_form.bio.errors %}
+                    <div class="text-danger small mt-1">{{ p_form.bio.errors.0 }}</div>
+                    {% endif %}
+                </div>
 
-            </div>
+                <div class="form-group">
+                    <label class="font-weight-bold">Foto de perfil</label>
+                    {{ p_form.image }}
+                    {% if p_form.image.errors %}
+                    <div class="text-danger small mt-1">{{ p_form.image.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'profile' request.user.username %}"
+                       class="btn text-muted"
+                       style="border:1px solid #ccc; border-radius:20px;">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                            class="btn text-white"
+                            style="background-color:#383c44; border-radius:20px;
+                                   padding-left:2rem; padding-right:2rem;">
+                        Guardar cambios
+                    </button>
+                </div>
+            </form>
+
         </div>
     </div>
-    <!-- End Center -->
 </div>
-
 {% endblock content %}

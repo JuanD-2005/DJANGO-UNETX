@@ -1,28 +1,83 @@
 {% extends 'twitter/layout.html' %}
 {% load humanize %}
-{% block content %}
-<div class="container mt-4">
-  <!-- Formulario de búsqueda -->
-  <form method="get" action="{% url 'buscar_usuarios' %}" class="form-inline my-2">
-    <input class="form-control mr-sm-2 w-75" type="search" placeholder="Buscar usuarios..." name="q" value="{{ query }}" aria-label="Buscar">
-    <button class="btn btn-outline-success my-2 my-sm-0" style="background-color: #383c44; color: white;" type="submit">Buscar</button>
-  </form>
 
-  <h2 class="mt-4">Resultados para: "{{ query }}"</h2>
-  
-  {% if usuarios %}
-    <ul class="list-group">
-      {% for usuario in usuarios %}
-        <li class="list-group-item d-flex align-items-center">
-          <img src="{{ usuario.profile.image.url }}" alt="{{ usuario.first_name }}" class="rounded-circle mr-3" style="width:40px;">
-          <a href="{% url 'profile' usuario %}">
-            {{ usuario.first_name }} {{ usuario.last_name }} (@{{ usuario.username }})
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No se encontraron usuarios que coincidan con tu búsqueda.</p>
-  {% endif %}
+{% block title %}Buscar usuarios{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width:700px;">
+
+    {# ── Formulario de búsqueda ── #}
+    <form method="get" action="{% url 'buscar_usuarios' %}" class="mb-4">
+        <div class="input-group">
+            <input class="form-control" type="search"
+                   placeholder="Buscar por nombre o usuario..."
+                   name="q" value="{{ query }}" aria-label="Buscar">
+            <div class="input-group-append">
+                <button class="btn text-white" type="submit"
+                        style="background-color:#383c44;">
+                    🔍 Buscar
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {# ── Resultados ── #}
+    {% if query %}
+        <h5 class="mb-3 text-muted">
+            Resultados para: <strong>"{{ query }}"</strong>
+            {% if page_obj.paginator.count %}
+                <span class="badge badge-secondary ml-1">
+                    {{ page_obj.paginator.count }}
+                </span>
+            {% endif %}
+        </h5>
+
+        {# BuscarUsuariosView es un ListView con paginate_by=20.               #}
+        {# 'usuarios' contiene los objetos de la página actual.                #}
+        {# 'page_obj' está disponible automáticamente para los controles.      #}
+        {% if usuarios %}
+        <ul class="list-group mb-3">
+            {% for usuario in usuarios %}
+            <li class="list-group-item d-flex align-items-center">
+                <img src="{{ usuario.profile.image.url }}"
+                     alt="{{ usuario.username }}"
+                     class="rounded-circle mr-3"
+                     style="width:45px; height:45px; object-fit:cover;">
+                <div>
+                    <a href="{% url 'profile' usuario.username %}"
+                       style="font-weight:600; color:#14171a; text-decoration:none;">
+                        {{ usuario.first_name }} {{ usuario.last_name }}
+                    </a>
+                    <br>
+                    <span class="text-muted small">@{{ usuario.username }}</span>
+                </div>
+                {% if request.user.is_authenticated and usuario != request.user %}
+                <a href="{% url 'follow' usuario.username %}"
+                   class="btn btn-sm text-white ml-auto"
+                   style="background-color:#383c44;">
+                    Seguir
+                </a>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+
+        {# Paginación: preserva el parámetro ?q=... gracias a _pagination.html #}
+        {% include "twitter/_pagination.html" with page_obj=page_obj %}
+
+        {% else %}
+        <div class="alert alert-light text-center">
+            No se encontraron usuarios para <strong>"{{ query }}"</strong>.
+        </div>
+        {% endif %}
+
+    {% else %}
+    {# Sin búsqueda activa: estado vacío amigable #}
+    <div class="text-center text-muted py-5">
+        <p style="font-size:3rem;">🔍</p>
+        <p>Ingresa un nombre o @usuario para buscar.</p>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock content %}

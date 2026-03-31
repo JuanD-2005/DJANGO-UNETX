@@ -1,182 +1,245 @@
 {% extends 'twitter/layout.html' %}
 {% load humanize %}
+
+{% block title %}Feed{% endblock %}
+
 {% block content %}
 <div id="main" class="container-fluid d-flex">
-    <!-- Barra Izquierda -->
-    <div class="sidebar m-5 d-none d-md-block">
-        <div class="">
-            <div class="card" style="width: 18rem; text-align:center; border-radius: 20px;">
-                <img class="card-img-top rounded-circle"
-                     style="width:60%; position: relative; left: 62px; padding-top: 20px;"
-                     src="{{ request.user.profile.image.url }}" alt="Card image cap">
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold">{{ request.user.first_name }}</h5>    
-                    <h6 class="card-title font-weight-bold">@{{ request.user }}</h6>
-                    <p class="card-text">{{ request.user.profile.bio }}</p>
-                    <h6 class="card-title font-weight-bold">
-                        {{ request.user.profile.followers.count }} Followers
-                        {{ request.user.profile.following.count }} Following
-                    </h6>
-                    <a href="{% url 'profile' request.user %}" class="btn text-white rounded-pill" style="background-color: #383c44; color: white;">Mi perfil</a>
-                </div>
-            </div>
-            <a href="{% url 'editar' %}" id="addATweetLeft" onclick="addTweet()" type="button"
-             style="border-radius: 30px; font-size: 1.1rem; font-weight:bold; background-color: #383c44; color: white;"
-             class="btn btn-lg btn-block mt-4">Editar mi perfil</a>
-        </div>
-    </div>
-    <!-- End Barra Izquierda -->
 
-    <!-- Center -->
+    {# ════════════════════════════════════════════ SIDEBAR IZQUIERDO ══════ #}
+    <div class="sidebar m-5 d-none d-md-block">
+        <div class="card" style="width:18rem; text-align:center; border-radius:20px;">
+            <img class="card-img-top rounded-circle"
+                 style="width:60%; position:relative; left:62px; padding-top:20px;"
+                 src="{{ request.user.profile.image.url }}" alt="Tu foto de perfil">
+            <div class="card-body">
+                <h5 class="card-title font-weight-bold">{{ request.user.first_name }}</h5>
+                <h6 class="card-title font-weight-bold">@{{ request.user.username }}</h6>
+                <p class="card-text">{{ request.user.profile.bio }}</p>
+                <h6 class="card-title font-weight-bold">
+                    {# Usamos las properties del modelo — no disparan queries extra      #}
+                    {# porque el Profile ya viene cargado via select_related en el view. #}
+                    {{ request.user.profile.followers_count }} Followers
+                    &middot;
+                    {{ request.user.profile.following_count }} Following
+                </h6>
+                <a href="{% url 'profile' request.user.username %}"
+                   class="btn text-white rounded-pill"
+                   style="background-color:#383c44;">Mi perfil</a>
+            </div>
+        </div>
+        <a href="{% url 'editar' %}"
+           class="btn btn-lg btn-block mt-4 text-white"
+           style="border-radius:30px; font-size:1.1rem; font-weight:bold; background-color:#383c44;">
+            Editar mi perfil
+        </a>
+    </div>
+    {# ══════════════════════════════════════ FIN SIDEBAR IZQUIERDO ══════ #}
+
+    {# ════════════════════════════════════════════ CONTENIDO CENTRAL ══════ #}
     <div class="content">
+
+        {# ── Formulario nuevo post ── #}
         <div id="inputTweetArea" class="tweet-wrap">
             <div class="d-flex">
                 <div class="col-xs">
-                    <!-- Image form -->
-                    <img src="{{ request.user.profile.image.url }}" alt=""
-                         class="avator">
+                    <img src="{{ request.user.profile.image.url }}" alt="" class="avator">
                 </div>
-                <!-- Formulario -->
                 <form class="col pr-0" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.content }}
-                    {{ form.image }} 
-                    <div class="container d-flex" style="padding: 1rem 0 0 0;">
+                    {{ form.image }}
+                    {% if form.content.errors %}
+                        <div class="text-danger small mt-1">{{ form.content.errors.0 }}</div>
+                    {% endif %}
+                    <div class="container d-flex" style="padding:1rem 0 0 0;">
                         <div id="leftBtn">
-                            <div id="charBadge" class="badge badge-pill badge-primary ml-2"
-                                style="display: flex; align-items: center; width: 50%; justify-content: center; background-color: #383c44; color: white;">
-                                <div id="charCountArea">200</div>
+                            <div id="charBadge" class="badge badge-pill ml-2"
+                                 style="display:flex; align-items:center; width:50%;
+                                        justify-content:center; background-color:#383c44; color:white;">
+                                <span id="charCountArea">280</span>
                             </div>
                         </div>
                         <div id="rightBtn">
-                            <button class="btn rounded-pill" style="width: 100%; background-color: #383c44; color: white;">Tweet</button>
+                            <button class="btn rounded-pill"
+                                    style="width:100%; background-color:#383c44; color:white;">
+                                Tweet
+                            </button>
                         </div>
                     </div>
                 </form>
-                <!-- Formulario -->
             </div>
-            <div class="d-flex justify-content-center mt-2"></div>
         </div>
+        {# ── Fin formulario ── #}
 
-        <!-- Tweets -->
-        {% for post in posts %}
-        <div id="tweetCards">
-            <div class="tweet-wrap" style="border-radius:20px">
-                <!-- Contenido del post -->
-                <div class="tweet-header">
-                    <img src="{{ post.user.profile.image.url }}" alt="" class="avator">
-                    <div class="tweet-header-info">
-                        <a href="{% url 'profile' post.user.username %}">
-                            {{ post.user.first_name }}
+        {# ════════════════════════════════════════════════ LISTA DE POSTS ══ #}
+        {# Iteramos page_obj (Page object de Django Paginator).               #}
+        {# page_obj contiene solo los posts de la página actual → O(1) mem.  #}
+        {% for post in page_obj %}
+        <div class="tweet-wrap" style="border-radius:20px;">
+            <div class="tweet-header">
+                <img src="{{ post.user.profile.image.url }}" alt="" class="avator">
+                <div class="tweet-header-info">
+                    <a href="{% url 'profile' post.user.username %}">
+                        <strong>{{ post.user.first_name|default:post.user.username }}</strong>
+                    </a>
+                    <span class="text-muted">@{{ post.user.username }}</span>
+                    <span class="text-muted small">· {{ post.timestamp|naturaltime }}</span>
+
+                    {# ── Banner de retweet ─────────────────────────────── #}
+                    {# FIX: campo renombrado de 'retweet' a 'retweet_of'    #}
+                    {% if post.retweet_of %}
+                    <div class="text-muted small mb-1">
+                        🔁 Reenviado de
+                        <a href="{% url 'profile' post.retweet_of.user.username %}">
+                            @{{ post.retweet_of.user.username }}
                         </a>
-                        <span>@{{ post.user.username }}</span>
-                        <span>{{ post.timestamp|naturaltime }}</span>
-                        <p>{{ post.content }}</p>
-                        {% if post.image %}
-                            <div>
-                                <img src="{{ post.image.url }}" alt="Imagen del tweet" style="max-width: 100%;">
-                            </div>
-                        {% endif %}
-                        {% if post.retweet %}
-                            <small>Reenviado de <a href="{% url 'profile' post.retweet.user.username %}">{{ post.retweet.user.username }}</a></small>
-                        {% endif %}
                     </div>
-                </div>
-                <!-- Botones de interacción -->
-                <div class="tweet-info-counts">
-                    <!-- Otros botones (comentarios, likes, etc.) -->
-                    <div class="retweets">
-                        <a href="{% url 'retweet' post.id %}" style="text-decoration: none; color: inherit;">
-                            <button style="background: white; border: none;">
-                                <svg class="feather feather-repeat" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <polyline points="17 1 21 5 17 9"></polyline>
-                                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
-                                    <polyline points="7 23 3 19 7 15"></polyline>
-                                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
-                                </svg>
-                            </button>
-                        </a>
-                        <div class="retweet-count"></div>
-                    </div>
-                    <!-- Resto de botones -->
+                    {% endif %}
+
+                    <p class="mt-1 mb-1">{{ post.content }}</p>
+
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="Imagen del post"
+                         class="img-fluid rounded mt-1" style="max-height:300px;">
+                    {% endif %}
                 </div>
             </div>
+
+            {# ── Botones de interacción ── #}
+            <div class="tweet-info-counts">
+
+                {# ── Like ────────────────────────────────────────────── #}
+                {# liked_post_ids es un set Python → lookup O(1),         #}
+                {# sin query adicional a la base de datos por post.       #}
+                <div class="likes">
+                    <a href="{% url 'like' post.id %}" style="text-decoration:none; color:inherit;">
+                        <button style="background:white; border:none;" title="Me gusta">
+                            {% if post.id in liked_post_ids %}
+                                {# Corazón relleno — ya le diste like #}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                     viewBox="0 0 24 24" fill="#e0245e" stroke="#e0245e"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06
+                                             a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78
+                                             1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                            {% else %}
+                                {# Corazón vacío — sin like todavía #}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06
+                                             a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78
+                                             1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                            {% endif %}
+                        </button>
+                    </a>
+                    <span class="small text-muted">{{ post.like_count }}</span>
+                </div>
+
+                {# ── Retweet ── #}
+                <div class="retweets">
+                    <a href="{% url 'retweet' post.id %}" style="text-decoration:none; color:inherit;">
+                        <button style="background:white; border:none;" title="Retweet">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="17 1 21 5 17 9"/>
+                                <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+                                <polyline points="7 23 3 19 7 15"/>
+                                <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+                            </svg>
+                        </button>
+                    </a>
+                    <span class="small text-muted">{{ post.retweet_count }}</span>
+                </div>
+
+                {# ── Eliminar (solo dueño del post) ── #}
+                {% if request.user == post.user %}
+                <div class="trash">
+                    {# Enlace a PostDeleteView que muestra página de confirmación #}
+                    <a href="{% url 'delete' post.id %}" title="Eliminar post">
+                        <i class="fa fa-trash-o" style="color:#657786; font-size:20px;"
+                           aria-hidden="true"></i>
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+        {% empty %}
+        <div class="tweet-wrap text-center text-muted py-5">
+            <p>Tu feed está vacío. ¡Sigue a otros usuarios para ver sus posts!</p>
+            <a href="{% url 'buscar_usuarios' %}" class="btn text-white"
+               style="background-color:#383c44;">Descubrir usuarios</a>
         </div>
         {% endfor %}
-        <!-- EndTweets -->
-    </div>
-    <!-- End Center -->
+        {# ════════════════════════════════════ FIN LISTA DE POSTS ══════════ #}
 
-    <!-- Barra Derecha -->
-   <!-- Barra Derecha -->
-<div class="sidebar m-5 d-none d-xl-block">
-    <!-- Usuarios más seguidos -->
-    <div class="card mb-3" style="width: 18rem;">
-        <div class="card-header" style="background-color: #383c44; color: white;">
-            Usuarios más seguidos
-        </div>
-        <ul class="list-group list-group-flush">
-            {% for user in suggested_users %}
-                <li class="list-group-item">
-                    <a href="{% url 'profile' user.username %}" 
-                       style="text-decoration: none; color: #657787;">
-                        @{{ user.username }} ({{ user.num_followers }} seguidores)
-                    </a>
-                </li>
-            {% empty %}
-                <li class="list-group-item text-muted">No hay sugerencias</li>
-            {% endfor %}
-        </ul>
-    </div>
+        {# ── Paginación ── #}
+        {% include "twitter/_pagination.html" with page_obj=page_obj %}
 
-    <!-- Usuarios más activos -->
-        <div class="card" style="width: 18rem;">
-            <div class="card-header" style="background-color: #383c44; color: white;">
-                Usuarios más activos
+    </div>
+    {# ══════════════════════════════════════ FIN CONTENIDO CENTRAL ══════════ #}
+
+    {# ════════════════════════════════════════════ SIDEBAR DERECHO ══════════ #}
+    {# CAMBIO: eliminado 'most_active_users' — ya no se envía desde la vista.  #}
+    {# Solo se muestra 'suggested_users' (usuarios con más seguidores a quienes #}
+    {# el usuario actual aún no sigue).                                         #}
+    <div class="sidebar m-5 d-none d-xl-block">
+        <div class="card" style="width:18rem;">
+            <div class="card-header text-white" style="background-color:#383c44;">
+                A quién seguir
             </div>
-            <ul class="list-group list-group-flush" style="background-color: #f0f0f0;">
-                {% for user in most_active_users %}
-                    <li class="list-group-item">
-                        <a href="{% url 'profile' user.username %}" 
-                        style="text-decoration: none; color: #657787;">
-                            @{{ user.username }} ({{ user.num_posts }} posts)
-                        </a>
-                    </li>
+            <ul class="list-group list-group-flush">
+                {% for suggested in suggested_users %}
+                <li class="list-group-item d-flex align-items-center justify-content-between">
+                    <a href="{% url 'profile' suggested.username %}"
+                       style="text-decoration:none; color:#657787;">
+                        <img src="{{ suggested.profile.image.url }}"
+                             class="rounded-circle mr-2" width="30" height="30"
+                             alt="{{ suggested.username }}">
+                        @{{ suggested.username }}
+                        <span class="text-muted small">({{ suggested.num_followers }})</span>
+                    </a>
+                    <a href="{% url 'follow' suggested.username %}"
+                       class="btn btn-sm text-white"
+                       style="background-color:#383c44;">+</a>
+                </li>
                 {% empty %}
-                    <li class="list-group-item text-muted">No hay sugerencias</li>
+                <li class="list-group-item text-muted">Sin sugerencias</li>
                 {% endfor %}
-             </ul>
+            </ul>
         </div>
     </div>
-</div>
+    {# ══════════════════════════════════════ FIN SIDEBAR DERECHO ════════════ #}
 
-<!-- Script para actualizar el contador de caracteres y evitar ingresar más de 200 caracteres -->
+</div>
+{% endblock content %}
+
+{% block extra_js %}
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function () {
     const inputField = document.querySelector('textarea[name="content"]');
     const charCountArea = document.getElementById("charCountArea");
-    const maxChars = 200;
-    
-    // Establece el atributo maxlength para prevenir la entrada extra
+    const maxChars = 280;
+
+    if (!inputField || !charCountArea) return;
+
     inputField.setAttribute("maxlength", maxChars);
-    
+
     function updateCounter() {
-      let currentLength = inputField.value.length;
-      // Si por alguna razón se excede (por ejemplo, por pegado de texto), recorta el valor
-      if (currentLength > maxChars) {
-        inputField.value = inputField.value.substring(0, maxChars);
-        currentLength = maxChars;
-      }
-      charCountArea.textContent = maxChars - currentLength;
+      const remaining = maxChars - inputField.value.length;
+      charCountArea.textContent = remaining;
+      // Aviso visual cuando quedan menos de 20 caracteres
+      charCountArea.closest('#charBadge').style.backgroundColor =
+        remaining < 20 ? '#c0392b' : '#383c44';
     }
-    
-    // Actualiza el contador inicialmente
+
     updateCounter();
-    
-    // Actualiza el contador en cada entrada
     inputField.addEventListener("input", updateCounter);
   });
 </script>
-{% endblock content %}
+{% endblock extra_js %}

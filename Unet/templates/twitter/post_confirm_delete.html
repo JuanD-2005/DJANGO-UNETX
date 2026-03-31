@@ -1,0 +1,56 @@
+{% extends 'twitter/layout.html' %}
+
+{% block title %}Confirmar eliminación{% endblock %}
+
+{% block content %}
+{# ─────────────────────────────────────────────────────────────────────────── #}
+{# PostDeleteView (DeleteView) requiere este template.                         #}
+{# DeleteView hace GET aquí para mostrar confirmación, y POST para ejecutar.  #}
+{# El objeto Post está disponible como 'object' (nombre por defecto en CBVs). #}
+{# ─────────────────────────────────────────────────────────────────────────── #}
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card shadow-sm" style="max-width:520px; width:100%;">
+        <div class="card-header text-white font-weight-bold"
+             style="background-color:#c0392b;">
+            🗑️ Eliminar post
+        </div>
+        <div class="card-body">
+
+            <p class="mb-3">¿Estás seguro de que quieres eliminar este post?
+               Esta acción es <strong>irreversible</strong>.</p>
+
+            {# Preview del post a eliminar #}
+            <div class="p-3 mb-4 rounded"
+                 style="background:#f8f9fa; border-left:4px solid #c0392b;">
+                <div class="d-flex align-items-center mb-2">
+                    <img src="{{ object.user.profile.image.url }}"
+                         class="rounded-circle mr-2"
+                         style="width:36px; height:36px; object-fit:cover;"
+                         alt="{{ object.user.username }}">
+                    <strong>@{{ object.user.username }}</strong>
+                </div>
+                <p class="mb-0">{{ object.content }}</p>
+            </div>
+
+            {# DeleteView espera un POST para confirmar el borrado #}
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'home' %}"
+                       class="btn text-muted"
+                       style="border:1px solid #ccc; border-radius:20px;">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                            class="btn text-white"
+                            style="background-color:#c0392b; border-radius:20px;
+                                   padding-left:2rem; padding-right:2rem;">
+                        Sí, eliminar
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}
