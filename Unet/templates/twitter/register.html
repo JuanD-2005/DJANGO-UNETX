@@ -1,191 +1,119 @@
-{% extends 'twitter/layout.html' %}
-{% load static %}
-
+{% extends 'twitter/base_auth.html' %}
 {% block title %}Crear cuenta{% endblock %}
 
 {% block content %}
-<style>
-  :root {
-    --primary-color: #1da1f2;
-    --primary-hover: #0d95e8;
-    --text-dark: #14171a;
-    --text-light: #657786;
-    --border-color: #ccd6dd;
-    --background-color: #f5f8fa;
-    --error-color: #e0245e;
-    --success-color: #17bf63;
-    --shadow-medium: 0 4px 12px rgba(0,0,0,0.15);
-  }
-  .register-wrap {
-    min-height: calc(100vh - 60px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--background-color);
-    padding: 2rem 1rem;
-  }
-  .register-box {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: var(--shadow-medium);
-    padding: 40px;
-    width: 100%;
-    max-width: 480px;
-    transition: transform .3s ease, box-shadow .3s ease;
-  }
-  .register-box:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  }
-  .register-header { text-align:center; margin-bottom:30px; }
-  .register-header h1 { font-size:28px; font-weight:700; color:var(--text-dark); }
-  .input-wrapper { margin-bottom:20px; }
-  .input-wrapper label {
-    display:block; margin-bottom:8px; font-weight:600;
-    color:var(--text-dark); font-size:14px;
-  }
-  .input-wrapper input {
-    width:100%; padding:14px 16px; border:1px solid var(--border-color);
-    border-radius:8px; box-sizing:border-box; font-size:15px;
-    transition:all .3s ease; background:#fafbfc;
-  }
-  .input-wrapper input:focus {
-    outline:none; border-color:var(--primary-color);
-    box-shadow:0 0 0 3px rgba(29,161,242,0.1); background:#fff;
-  }
-  .password-strength {
-    height:4px; background:#e6ecf0; border-radius:2px;
-    margin-top:8px; overflow:hidden;
-  }
-  .password-strength-bar {
-    height:100%; width:0%; border-radius:2px;
-    transition: width .3s ease, background-color .3s ease;
-  }
-  .strength-weak   .password-strength-bar { width:30%; background:var(--error-color); }
-  .strength-medium .password-strength-bar { width:65%; background:#ffad1f; }
-  .strength-strong .password-strength-bar { width:100%; background:var(--success-color); }
-  .error-msg {
-    color:var(--error-color); font-size:13px; margin-top:5px;
-    display:flex; align-items:center;
-  }
-  .error-msg::before { content:"⚠ "; margin-right:4px; }
-  .register-btn {
-    width:100%; padding:14px; background:var(--primary-color);
-    border:none; color:#fff; border-radius:8px; font-size:16px;
-    font-weight:600; cursor:pointer; transition:all .3s ease;
-    box-shadow:0 2px 4px rgba(29,161,242,0.3); margin-top:10px;
-  }
-  .register-btn:hover {
-    background:var(--primary-hover); transform:translateY(-2px);
-  }
-  .register-footer {
-    text-align:center; margin-top:25px; font-size:14px;
-    padding-top:20px; border-top:1px solid #e6ecf0;
-  }
-  .register-footer a { color:var(--primary-color); text-decoration:none; font-weight:500; }
-  .register-footer a:hover { text-decoration:underline; }
-  .terms { font-size:12px; color:var(--text-light); text-align:center; margin-top:20px; }
-  .terms a { color:var(--primary-color); text-decoration:none; }
-</style>
+<h2 class="auth-heading">Únete a UnetX</h2>
+<p class="auth-subtitle">Crea tu cuenta gratis</p>
 
-<div class="register-wrap">
-  <div class="register-box">
-    <header class="register-header">
-      <h1>Únete a UnetX</h1>
-    </header>
+<form method="POST" id="reg-form">
+    {% csrf_token %}
 
-    <form method="POST">
-      {% csrf_token %}
-
-      <div class="input-wrapper">
+    <div class="field">
         <label>Nombre</label>
         {{ form.first_name }}
         {% if form.first_name.errors %}
-          <div class="error-msg">{{ form.first_name.errors.0 }}</div>
+        <div class="field-error">{{ form.first_name.errors.0 }}</div>
         {% endif %}
-      </div>
+    </div>
 
-      <div class="input-wrapper">
+    <div class="field">
         <label>Usuario</label>
         {{ form.username }}
         {% if form.username.errors %}
-          <div class="error-msg">{{ form.username.errors.0 }}</div>
+        <div class="field-error">{{ form.username.errors.0 }}</div>
         {% endif %}
-      </div>
+    </div>
 
-      <div class="input-wrapper">
+    <div class="field">
         <label>Correo electrónico</label>
         {{ form.email }}
         {% if form.email.errors %}
-          <div class="error-msg">{{ form.email.errors.0 }}</div>
+        <div class="field-error">{{ form.email.errors.0 }}</div>
         {% endif %}
-      </div>
+    </div>
 
-      <div class="input-wrapper">
+    <div class="field">
         <label>Contraseña</label>
         {{ form.password1 }}
-        <div class="password-strength" id="pwd-strength-bar">
-          <div class="password-strength-bar"></div>
+        <div class="pwd-strength-wrap">
+            <div class="pwd-bar" id="bar1"></div>
+            <div class="pwd-bar" id="bar2"></div>
+            <div class="pwd-bar" id="bar3"></div>
+            <div class="pwd-bar" id="bar4"></div>
         </div>
         {% if form.password1.errors %}
-          <div class="error-msg">{{ form.password1.errors.0 }}</div>
+        <div class="field-error">{{ form.password1.errors.0 }}</div>
         {% endif %}
-      </div>
+    </div>
 
-      <div class="input-wrapper">
+    <div class="field">
         <label>Confirmar contraseña</label>
         {{ form.password2 }}
         {% if form.password2.errors %}
-          <div class="error-msg">{{ form.password2.errors.0 }}</div>
+        <div class="field-error">{{ form.password2.errors.0 }}</div>
         {% endif %}
-      </div>
-
-      {# Errores no ligados a un campo específico (ej: non_field_errors) #}
-      {% if form.non_field_errors %}
-      <div class="alert alert-danger py-2 small">
-        {{ form.non_field_errors.0 }}
-      </div>
-      {% endif %}
-
-      <button type="submit" class="register-btn">Crear cuenta</button>
-    </form>
-
-    <p class="terms">
-      Al registrarte aceptas los
-      <a href="#">Términos de servicio</a> y la
-      <a href="#">Política de privacidad</a>.
-    </p>
-
-    <div class="register-footer">
-      <a href="{% url 'login' %}">¿Ya tienes cuenta? Inicia sesión</a>
     </div>
-  </div>
+
+    {% if form.non_field_errors %}
+    <div class="alert-err">{{ form.non_field_errors.0 }}</div>
+    {% endif %}
+
+    <button type="submit" class="btn-primary-auth">Crear cuenta</button>
+</form>
+
+<div class="auth-divider">Al registrarte, aceptas los Términos y la Privacidad</div>
+
+<div class="auth-footer">
+    <a href="{% url 'login' %}">¿Ya tienes cuenta? Inicia sesión</a>
 </div>
-{% endblock content %}
+{% endblock %}
 
 {% block extra_js %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const pwd = document.querySelector('input[name="password1"]');
-    const bar = document.getElementById("pwd-strength-bar");
-    if (!pwd || !bar) return;
-
-    pwd.addEventListener("input", function () {
-      const v = this.value;
-      let score = 0;
-      if (v.length >= 8)           score++;
-      if (/[a-z]/.test(v))         score++;
-      if (/[A-Z]/.test(v))         score++;
-      if (/[0-9]/.test(v))         score++;
-      if (/[^a-zA-Z0-9]/.test(v))  score++;
-
-      bar.className = "password-strength";
-      if (v.length > 0) {
-        if (score <= 2)      bar.classList.add("strength-weak");
-        else if (score <= 4) bar.classList.add("strength-medium");
-        else                 bar.classList.add("strength-strong");
-      }
+// Style all inputs
+document.querySelectorAll('#reg-form input').forEach(el => {
+    el.style.width = '100%';
+    el.style.padding = '0.8rem 1rem';
+    el.style.background = 'var(--card)';
+    el.style.border = '1px solid var(--border)';
+    el.style.borderRadius = '10px';
+    el.style.color = 'var(--text)';
+    el.style.fontSize = '0.95rem';
+    el.style.outline = 'none';
+    el.style.fontFamily = 'var(--font-body)';
+    el.style.transition = 'border-color 0.2s, box-shadow 0.2s';
+    el.addEventListener('focus', () => {
+        el.style.borderColor = 'var(--accent)';
+        el.style.boxShadow = '0 0 0 3px var(--accent-dim)';
     });
-  });
+    el.addEventListener('blur', () => {
+        el.style.borderColor = 'var(--border)';
+        el.style.boxShadow = 'none';
+    });
+});
+
+// Password strength meter
+const pwdInput = document.querySelector('input[name="password1"]');
+const bars = [
+    document.getElementById('bar1'),
+    document.getElementById('bar2'),
+    document.getElementById('bar3'),
+    document.getElementById('bar4'),
+];
+if (pwdInput) {
+    pwdInput.addEventListener('input', function() {
+        const v = this.value;
+        let score = 0;
+        if (v.length >= 8)          score++;
+        if (/[A-Z]/.test(v))        score++;
+        if (/[0-9]/.test(v))        score++;
+        if (/[^a-zA-Z0-9]/.test(v)) score++;
+
+        const cls = score <= 1 ? 'weak' : score <= 2 ? 'weak' : score <= 3 ? 'medium' : 'strong';
+        bars.forEach((b, i) => {
+            b.className = 'pwd-bar' + (v.length > 0 && i < score ? ' ' + cls : '');
+        });
+    });
+}
 </script>
 {% endblock extra_js %}

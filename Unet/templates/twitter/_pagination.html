@@ -1,56 +1,43 @@
-{# ─────────────────────────────────────────────────────────────────────────── #}
-{# _pagination.html                                                             #}
-{#                                                                              #}
-{# USO:  {% include "twitter/_pagination.html" with page_obj=page_obj %}       #}
-{#                                                                              #}
-{# Preserva TODOS los parámetros GET existentes (ej. ?q=busqueda) y            #}
-{# solo sobreescribe el parámetro `page`. Así la búsqueda + paginación         #}
-{# funcionan juntos sin perder el término buscado al cambiar de página.        #}
-{# ─────────────────────────────────────────────────────────────────────────── #}
+{# ── _pagination.html ────────────────────────────────────────────────────── #}
+{# USO: {% include "twitter/_pagination.html" with page_obj=page_obj %}      #}
+{# Preserva parámetro ?q= para que búsqueda + paginación funcionen juntos.  #}
+{# ────────────────────────────────────────────────────────────────────────── #}
 {% if page_obj.paginator.num_pages > 1 %}
-<nav aria-label="Paginación" class="mt-4">
-    <ul class="pagination justify-content-center flex-wrap">
+<div class="pagination-bar">
 
-        {# ── Anterior ── #}
-        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
-            <a class="page-link"
-               href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}"
-               aria-label="Anterior">
-                <span aria-hidden="true">&laquo;</span>
+    {# ← Anterior #}
+    {% if page_obj.has_previous %}
+    <a class="page-btn"
+       href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}"
+       aria-label="Anterior">←</a>
+    {% else %}
+    <span class="page-btn disabled">←</span>
+    {% endif %}
+
+    {# Números con ventana ±2 alrededor de la página actual #}
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <span class="page-btn active">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a class="page-btn"
+               href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}">
+                {{ num }}
             </a>
-        </li>
+        {% endif %}
+    {% endfor %}
 
-        {# ── Números de página ── #}
-        {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-                <li class="page-item active" aria-current="page">
-                    <span class="page-link" style="background-color:#383c44; border-color:#383c44;">
-                        {{ num }}
-                    </span>
-                </li>
-            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <li class="page-item">
-                    <a class="page-link"
-                       href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}">
-                        {{ num }}
-                    </a>
-                </li>
-            {% endif %}
-        {% endfor %}
+    {# → Siguiente #}
+    {% if page_obj.has_next %}
+    <a class="page-btn"
+       href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}"
+       aria-label="Siguiente">→</a>
+    {% else %}
+    <span class="page-btn disabled">→</span>
+    {% endif %}
 
-        {# ── Siguiente ── #}
-        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
-            <a class="page-link"
-               href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}"
-               aria-label="Siguiente">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
-
-    </ul>
-    <p class="text-center text-muted small">
-        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-        &mdash; {{ page_obj.paginator.count }} resultado{{ page_obj.paginator.count|pluralize }}
-    </p>
-</nav>
+</div>
+<p class="page-meta">
+    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+    &mdash; {{ page_obj.paginator.count }} resultado{{ page_obj.paginator.count|pluralize }}
+</p>
 {% endif %}

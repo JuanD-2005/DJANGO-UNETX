@@ -1,77 +1,107 @@
 {% extends 'twitter/layout.html' %}
-
 {% block title %}Editar perfil{% endblock %}
 
 {% block content %}
-<div class="container mt-5" style="max-width:600px;">
-    <div class="card shadow-sm">
-        <div class="card-header text-white font-weight-bold"
-             style="background-color:#383c44;">
-            ✏️ Editar mi perfil
-        </div>
-        <div class="card-body">
+<div class="page-shell" style="grid-template-columns:1fr;">
+<main class="main-content" style="border-right:none; max-width:580px; margin:0 auto; width:100%;">
 
-            {# Preview de imagen actual antes de editar #}
-            <div class="text-center mb-4">
-                <img src="{{ request.user.profile.image.url }}"
-                     alt="Foto actual"
-                     class="rounded-circle"
-                     style="width:90px; height:90px; object-fit:cover;
-                            border:3px solid #383c44;">
-                <p class="text-muted small mt-1">Foto actual</p>
-            </div>
+    <div class="section-header">
+        <a href="{% url 'profile' request.user.username %}" class="back-btn">←</a>
+        <h1>Editar perfil</h1>
+        <button form="edit-form" type="submit" class="btn btn-gradient btn-sm" style="margin-left:auto;">
+            Guardar
+        </button>
+    </div>
 
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-
-                <div class="form-group">
-                    <label class="font-weight-bold">Nombre</label>
-                    {{ u_form.first_name }}
-                    {% if u_form.first_name.errors %}
-                    <div class="text-danger small mt-1">{{ u_form.first_name.errors.0 }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label class="font-weight-bold">Usuario</label>
-                    {{ u_form.username }}
-                    {% if u_form.username.errors %}
-                    <div class="text-danger small mt-1">{{ u_form.username.errors.0 }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label class="font-weight-bold">Bio</label>
-                    {{ p_form.bio }}
-                    {% if p_form.bio.errors %}
-                    <div class="text-danger small mt-1">{{ p_form.bio.errors.0 }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label class="font-weight-bold">Foto de perfil</label>
-                    {{ p_form.image }}
-                    {% if p_form.image.errors %}
-                    <div class="text-danger small mt-1">{{ p_form.image.errors.0 }}</div>
-                    {% endif %}
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="{% url 'profile' request.user.username %}"
-                       class="btn text-muted"
-                       style="border:1px solid #ccc; border-radius:20px;">
-                        Cancelar
-                    </a>
-                    <button type="submit"
-                            class="btn text-white"
-                            style="background-color:#383c44; border-radius:20px;
-                                   padding-left:2rem; padding-right:2rem;">
-                        Guardar cambios
-                    </button>
-                </div>
-            </form>
-
+    {# ── Avatar preview + fake banner ── #}
+    <div style="position:relative; margin-bottom:3rem;">
+        <div style="height:100px; background:var(--gradient); opacity:0.4;"></div>
+        <div style="position:absolute; bottom:-2.5rem; left:1.25rem;">
+            <img src="{{ request.user.profile.image.url }}"
+                 alt="{{ request.user.username }}"
+                 id="avatar-preview"
+                 style="width:80px; height:80px; border-radius:50%; object-fit:cover;
+                        border:4px solid var(--bg); display:block;">
         </div>
     </div>
+
+    <form id="edit-form" method="post" enctype="multipart/form-data"
+          style="padding:0 1.5rem 2rem;">
+        {% csrf_token %}
+
+        <div class="form-field">
+            <label>Nombre</label>
+            {{ u_form.first_name }}
+            {% if u_form.first_name.errors %}
+            <div class="field-err">{{ u_form.first_name.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            <label>Usuario</label>
+            {{ u_form.username }}
+            {% if u_form.username.errors %}
+            <div class="field-err">{{ u_form.username.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            <label>Bio</label>
+            {{ p_form.bio }}
+            {% if p_form.bio.errors %}
+            <div class="field-err">{{ p_form.bio.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            <label>Foto de perfil</label>
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <label style="display:inline-flex; align-items:center; gap:0.5rem;
+                              padding:0.6rem 1rem; background:var(--card-hi);
+                              border:1px solid var(--border); border-radius:var(--radius-sm);
+                              cursor:pointer; font-size:0.875rem; color:var(--text-2);
+                              transition:border-color var(--transition), color var(--transition);"
+                       onmouseover="this.style.borderColor='var(--accent)'; this.style.color='var(--accent)'"
+                       onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-2)'">
+                    📷 Cambiar foto
+                    {{ p_form.image }}
+                </label>
+            </div>
+            {% if p_form.image.errors %}
+            <div class="field-err">{{ p_form.image.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1.5rem;">
+            <a href="{% url 'profile' request.user.username %}" class="btn btn-ghost">Cancelar</a>
+            <button type="submit" class="btn btn-gradient">Guardar cambios</button>
+        </div>
+    </form>
+
+</main>
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+// Style all Django form inputs to match design system
+document.querySelectorAll('#edit-form input[type="text"], #edit-form input[type="email"], #edit-form textarea')
+    .forEach(el => el.className = 'form-control');
+
+// Hide file input, show avatar preview on change
+const fileInput = document.querySelector('input[type="file"]');
+if (fileInput) {
+    fileInput.style.display = 'none';
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const preview = document.getElementById('avatar-preview');
+                if (preview) preview.src = e.target.result;
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+}
+</script>
+{% endblock extra_js %}

@@ -1,56 +1,56 @@
 {% extends 'twitter/layout.html' %}
-
 {% block title %}Confirmar eliminación{% endblock %}
 
 {% block content %}
-{# ─────────────────────────────────────────────────────────────────────────── #}
-{# PostDeleteView (DeleteView) requiere este template.                         #}
-{# DeleteView hace GET aquí para mostrar confirmación, y POST para ejecutar.  #}
-{# El objeto Post está disponible como 'object' (nombre por defecto en CBVs). #}
-{# ─────────────────────────────────────────────────────────────────────────── #}
-<div class="container mt-5 d-flex justify-content-center">
-    <div class="card shadow-sm" style="max-width:520px; width:100%;">
-        <div class="card-header text-white font-weight-bold"
-             style="background-color:#c0392b;">
-            🗑️ Eliminar post
-        </div>
-        <div class="card-body">
+<div class="page-shell" style="grid-template-columns:1fr;">
+<main class="main-content" style="border-right:none; max-width:520px; margin:0 auto; width:100%;">
 
-            <p class="mb-3">¿Estás seguro de que quieres eliminar este post?
-               Esta acción es <strong>irreversible</strong>.</p>
-
-            {# Preview del post a eliminar #}
-            <div class="p-3 mb-4 rounded"
-                 style="background:#f8f9fa; border-left:4px solid #c0392b;">
-                <div class="d-flex align-items-center mb-2">
-                    <img src="{{ object.user.profile.image.url }}"
-                         class="rounded-circle mr-2"
-                         style="width:36px; height:36px; object-fit:cover;"
-                         alt="{{ object.user.username }}">
-                    <strong>@{{ object.user.username }}</strong>
-                </div>
-                <p class="mb-0">{{ object.content }}</p>
-            </div>
-
-            {# DeleteView espera un POST para confirmar el borrado #}
-            <form method="post">
-                {% csrf_token %}
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'home' %}"
-                       class="btn text-muted"
-                       style="border:1px solid #ccc; border-radius:20px;">
-                        Cancelar
-                    </a>
-                    <button type="submit"
-                            class="btn text-white"
-                            style="background-color:#c0392b; border-radius:20px;
-                                   padding-left:2rem; padding-right:2rem;">
-                        Sí, eliminar
-                    </button>
-                </div>
-            </form>
-
-        </div>
+    <div class="section-header">
+        <a href="{% url 'home' %}" class="back-btn">←</a>
+        <h1>Eliminar post</h1>
     </div>
+
+    <div style="padding:2rem 1.5rem;">
+
+        <div style="background:rgba(244,63,94,0.06); border:1px solid rgba(244,63,94,0.2);
+                    border-radius:var(--radius); padding:1.25rem; margin-bottom:1.5rem;">
+            <p style="font-size:0.9rem; color:#fca5a5; margin:0 0 0.25rem;">
+                ⚠️ Esta acción es <strong>irreversible</strong>.
+            </p>
+            <p style="font-size:0.82rem; color:var(--text-3); margin:0;">
+                El post y todos sus likes serán eliminados permanentemente.
+            </p>
+        </div>
+
+        {# Post preview #}
+        <div class="post-card"
+             style="border:1px solid var(--border); border-radius:var(--radius);
+                    margin-bottom:1.5rem; cursor:default;">
+            <img src="{{ object.user.profile.image.url }}"
+                 alt="{{ object.user.username }}" class="post-card__avatar">
+            <div class="post-card__body">
+                <div class="post-card__meta">
+                    <span class="post-card__name">
+                        {{ object.user.first_name|default:object.user.username }}
+                    </span>
+                    <span class="post-card__handle">@{{ object.user.username }}</span>
+                </div>
+                <p class="post-card__text">{{ object.content }}</p>
+            </div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+                <a href="{% url 'home' %}" class="btn btn-ghost">Cancelar</a>
+                <button type="submit" class="btn btn-danger"
+                        style="background:var(--danger); color:#fff; border:none;">
+                    Sí, eliminar
+                </button>
+            </div>
+        </form>
+
+    </div>
+</main>
 </div>
 {% endblock content %}
