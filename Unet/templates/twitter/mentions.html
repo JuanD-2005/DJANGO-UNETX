@@ -1,69 +1,69 @@
 {% extends 'twitter/layout.html' %}
 {% load humanize %}
-
 {% block title %}Mis menciones{% endblock %}
 
 {% block content %}
-<div class="container mt-4" style="max-width:800px;">
+<div class="page-shell" style="grid-template-columns:1fr;">
+<main class="main-content" style="border-right:none; max-width:680px; margin:0 auto; width:100%;">
 
-    <h2 class="text-center mb-4 font-weight-bold">
-        🔔 Mis Menciones
+    <div class="section-header">
+        <h1>🔔 Menciones</h1>
         {% if page_obj.paginator.count %}
-        <span class="badge badge-secondary" style="font-size:0.8rem;">
+        <span class="badge badge-primary" style="margin-left:auto;">
             {{ page_obj.paginator.count }}
         </span>
         {% endif %}
-    </h2>
+    </div>
 
-    {# MentionsView es un ListView con paginate_by=20.              #}
-    {# 'mentions' = objetos de la página actual (context_object_name) #}
-    {# select_related resolvió Mention→Post→User→Profile en 1 JOIN  #}
-    {# sin queries extra aquí.                                       #}
     {% if mentions %}
-    <div class="list-group mb-3">
         {% for mention in mentions %}
-        <div class="list-group-item list-group-item-action mb-2"
-             style="border-radius:8px; border-left:4px solid #383c44;">
-            <div class="d-flex align-items-center mb-2">
+        <div style="padding:1.25rem; border-bottom:1px solid var(--border);
+                    transition:background var(--transition);"
+             onmouseover="this.style.background='rgba(255,255,255,0.015)'"
+             onmouseout="this.style.background=''">
+
+            {# ── Who mentioned you ── #}
+            <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem;">
                 <img src="{{ mention.post.user.profile.image.url }}"
-                     class="rounded-circle mr-2"
-                     style="width:38px; height:38px; object-fit:cover;"
-                     alt="{{ mention.post.user.username }}">
+                     alt="{{ mention.post.user.username }}" class="avatar avatar-sm">
                 <div>
                     <a href="{% url 'profile' mention.post.user.username %}"
-                       class="font-weight-bold"
-                       style="color:#383c44; text-decoration:none;">
+                       style="font-family:var(--font-display); font-weight:700;
+                              font-size:0.9rem; color:var(--text);">
                         @{{ mention.post.user.username }}
                     </a>
-                    <span class="text-muted small d-block">
+                    <span style="font-size:0.75rem; color:var(--text-3); margin-left:0.5rem;">
                         te mencionó · {{ mention.timestamp|naturaltime }}
                     </span>
                 </div>
             </div>
-            <blockquote class="mb-0 pl-3" style="border-left:3px solid #dee2e6;">
-                {{ mention.post.content }}
-            </blockquote>
-            <div class="mt-2">
-                <a href="{% url 'profile' mention.post.user.username %}"
-                   class="btn btn-sm text-white"
-                   style="background-color:#383c44; border-radius:15px;">
-                    Ver perfil
-                </a>
+
+            {# ── The post content ── #}
+            <div style="background:var(--card-hi); border:1px solid var(--border);
+                        border-radius:var(--radius-sm); padding:0.875rem 1rem;
+                        border-left:3px solid var(--accent); margin-left:2rem;">
+                <p style="font-size:0.9rem; color:var(--text); line-height:1.6; margin:0;">
+                    {{ mention.post.content }}
+                </p>
             </div>
+
         </div>
         {% endfor %}
-    </div>
 
-    {% include "twitter/_pagination.html" with page_obj=page_obj %}
+        {% include "twitter/_pagination.html" with page_obj=page_obj %}
 
     {% else %}
-    <div class="text-center text-muted py-5">
-        <p style="font-size:3rem;">🔕</p>
-        <p>Nadie te ha mencionado todavía.</p>
-        <p class="small">Cuando alguien escriba @{{ request.user.username }} en un post,
-           aparecerá aquí.</p>
+    <div class="empty-state">
+        <span class="empty-state__icon">🔕</span>
+        <p>
+            Nadie te ha mencionado todavía.<br>
+            <span style="font-size:0.82rem; color:var(--text-3);">
+                Aparecerá aquí cuando alguien escriba @{{ request.user.username }}.
+            </span>
+        </p>
     </div>
     {% endif %}
 
+</main>
 </div>
 {% endblock content %}

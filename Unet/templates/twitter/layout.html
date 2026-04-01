@@ -6,123 +6,832 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UnetX — {% block title %}Feed{% endblock %}</title>
 
-    <link rel="stylesheet"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-          crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css?family=Asap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
     <link rel="shortcut icon" href="{% static 'img/tab-icons.png' %}" type="image/x-icon">
+
+    <style>
+    /* ══════════════════════════════════════════════════════════════════
+       DESIGN SYSTEM — UNETX OBSIDIAN
+       ══════════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+        --bg:           #07080f;
+        --surface:      #0e1117;
+        --card:         #13161f;
+        --card-hi:      #1a1e2d;
+        --card-hover:   #1e2234;
+        --border:       #1f2436;
+        --border-hi:    #2d3456;
+        --accent:       #4f8eff;
+        --accent-dim:   rgba(79,142,255,0.12);
+        --accent-glow:  rgba(79,142,255,0.2);
+        --purple:       #7c3aed;
+        --gradient:     linear-gradient(135deg, #4f8eff, #7c3aed);
+        --text:         #e2e8f8;
+        --text-2:       #8b96b8;
+        --text-3:       #4a5470;
+        --success:      #10b981;
+        --danger:       #f43f5e;
+        --warning:      #f59e0b;
+        --radius:       16px;
+        --radius-sm:    10px;
+        --radius-xs:    6px;
+        --shadow-sm:    0 2px 8px rgba(0,0,0,0.3);
+        --shadow:       0 8px 32px rgba(0,0,0,0.4);
+        --shadow-lg:    0 20px 60px rgba(0,0,0,0.5);
+        --font-display: 'Syne', sans-serif;
+        --font-body:    'DM Sans', sans-serif;
+        --nav-h:        64px;
+        --sidebar-w:    260px;
+        --transition:   0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ── Reset & base ─────────────────────────────────────────────── */
+    html { scroll-behavior: smooth; }
+    body {
+        font-family: var(--font-body);
+        background: var(--bg);
+        color: var(--text);
+        margin: 0;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: none; }
+
+    /* ── Scrollbar ────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+    /* ══════════════════════════════════════════════════════════════════
+       NAVBAR — frosted glass top bar
+       ══════════════════════════════════════════════════════════════════ */
+    .topnav {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: var(--nav-h);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        padding: 0 1.5rem;
+        gap: 1rem;
+        background: rgba(7,8,15,0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+    }
+    .topnav__brand {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 800;
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .topnav__search {
+        flex: 1;
+        max-width: 340px;
+        position: relative;
+    }
+    .topnav__search input {
+        width: 100%;
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 99px;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 0.875rem;
+        outline: none;
+        transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+    .topnav__search input:focus {
+        border-color: var(--accent);
+        background: var(--card-hi);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .topnav__search input::placeholder { color: var(--text-3); }
+    .topnav__search-icon {
+        position: absolute;
+        left: 0.875rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-3);
+        font-size: 0.8rem;
+        pointer-events: none;
+    }
+
+    .topnav__links {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-left: auto;
+    }
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 99px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-2);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-family: var(--font-body);
+        transition: color var(--transition), background var(--transition);
+        white-space: nowrap;
+    }
+    .nav-link:hover { color: var(--text); background: var(--card-hi); }
+    .nav-link.active { color: var(--accent); background: var(--accent-dim); }
+    .nav-link--danger { color: var(--danger) !important; }
+    .nav-link--danger:hover { background: rgba(244,63,94,0.1) !important; }
+    .nav-link .icon { font-size: 1rem; line-height: 1; }
+    .nav-link span.label { display: none; }
+    @media (min-width: 900px) { .nav-link span.label { display: inline; } }
+
+    /* ══════════════════════════════════════════════════════════════════
+       PAGE SHELL — main layout below navbar
+       ══════════════════════════════════════════════════════════════════ */
+    .page-shell {
+        display: grid;
+        grid-template-columns: 1fr;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding-top: var(--nav-h);
+        min-height: 100vh;
+    }
+    @media (min-width: 768px) {
+        .page-shell { grid-template-columns: var(--sidebar-w) 1fr; }
+    }
+    @media (min-width: 1200px) {
+        .page-shell { grid-template-columns: var(--sidebar-w) 1fr 280px; }
+    }
+
+    /* ── Left sidebar ──────────────────────────────────────────────── */
+    .sidebar-left {
+        display: none;
+        position: sticky;
+        top: var(--nav-h);
+        height: calc(100vh - var(--nav-h));
+        overflow-y: auto;
+        padding: 1.5rem 1rem;
+        border-right: 1px solid var(--border);
+    }
+    @media (min-width: 768px) { .sidebar-left { display: block; } }
+
+    /* ── Right sidebar ─────────────────────────────────────────────── */
+    .sidebar-right {
+        display: none;
+        position: sticky;
+        top: var(--nav-h);
+        height: calc(100vh - var(--nav-h));
+        overflow-y: auto;
+        padding: 1.5rem 1rem;
+        border-left: 1px solid var(--border);
+    }
+    @media (min-width: 1200px) { .sidebar-right { display: block; } }
+
+    /* ── Main content ──────────────────────────────────────────────── */
+    .main-content {
+        min-width: 0;
+        border-right: 1px solid var(--border);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       CARDS — core UI component
+       ══════════════════════════════════════════════════════════════════ */
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .card:hover { border-color: var(--border-hi); }
+    .card--elevated {
+        background: var(--card-hi);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* ── Widget card (sidebar) ────────────────────────────────────── */
+    .widget {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    .widget__header {
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid var(--border);
+        font-family: var(--font-display);
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-2);
+    }
+    .widget__item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.1rem;
+        border-bottom: 1px solid var(--border);
+        transition: background var(--transition);
+        cursor: pointer;
+    }
+    .widget__item:last-child { border-bottom: none; }
+    .widget__item:hover { background: var(--card-hi); }
+    .widget__item a { color: var(--text); font-size: 0.875rem; font-weight: 500; }
+    .widget__item a:hover { color: var(--accent); }
+    .widget__item .meta { color: var(--text-3); font-size: 0.78rem; }
+
+    /* ══════════════════════════════════════════════════════════════════
+       PROFILE CARD (sidebar)
+       ══════════════════════════════════════════════════════════════════ */
+    .profile-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    .profile-card__banner {
+        height: 60px;
+        background: var(--gradient);
+        opacity: 0.5;
+    }
+    .profile-card__body {
+        padding: 0 1rem 1rem;
+        text-align: center;
+    }
+    .profile-card__avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        border: 3px solid var(--card);
+        object-fit: cover;
+        margin-top: -32px;
+        margin-bottom: 0.5rem;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .profile-card__name {
+        font-family: var(--font-display);
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.1rem;
+    }
+    .profile-card__handle {
+        font-size: 0.8rem;
+        color: var(--text-3);
+        margin-bottom: 0.5rem;
+    }
+    .profile-card__bio {
+        font-size: 0.82rem;
+        color: var(--text-2);
+        line-height: 1.5;
+        margin-bottom: 0.75rem;
+    }
+    .profile-card__stats {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        font-size: 0.82rem;
+        margin-bottom: 0.75rem;
+    }
+    .profile-card__stats span { color: var(--text-3); }
+    .profile-card__stats strong {
+        display: block;
+        font-size: 0.95rem;
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       BUTTONS — design system
+       ══════════════════════════════════════════════════════════════════ */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1.1rem;
+        border-radius: 99px;
+        font-family: var(--font-body);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition), background var(--transition);
+        outline: none;
+        white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-1px); opacity: 0.92; }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary {
+        background: var(--accent);
+        color: #fff;
+    }
+    .btn-primary:hover { box-shadow: 0 4px 16px var(--accent-glow); color: #fff; }
+
+    .btn-gradient {
+        background: var(--gradient);
+        color: #fff;
+    }
+    .btn-gradient:hover { box-shadow: 0 4px 20px var(--accent-glow); color: #fff; }
+
+    .btn-ghost {
+        background: transparent;
+        color: var(--text-2);
+        border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--card-hi); color: var(--text); border-color: var(--border-hi); }
+
+    .btn-danger {
+        background: rgba(244,63,94,0.12);
+        color: var(--danger);
+        border: 1px solid rgba(244,63,94,0.25);
+    }
+    .btn-danger:hover { background: rgba(244,63,94,0.2); }
+
+    .btn-success {
+        background: rgba(16,185,129,0.12);
+        color: var(--success);
+        border: 1px solid rgba(16,185,129,0.25);
+    }
+
+    .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.78rem; }
+    .btn-lg { padding: 0.7rem 1.5rem; font-size: 1rem; }
+    .btn-block { width: 100%; display: flex; }
+
+    /* ══════════════════════════════════════════════════════════════════
+       POST CARD — tweet card component
+       ══════════════════════════════════════════════════════════════════ */
+    .post-card {
+        padding: 1.25rem 1.25rem 1rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 0.875rem;
+        transition: background var(--transition);
+        cursor: default;
+    }
+    .post-card:hover { background: rgba(255,255,255,0.015); }
+
+    .post-card__avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid var(--border);
+        transition: border-color var(--transition);
+    }
+    .post-card__avatar:hover { border-color: var(--accent); }
+
+    .post-card__body { flex: 1; min-width: 0; }
+
+    .post-card__meta {
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.35rem;
+    }
+    .post-card__name {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text);
+        transition: color var(--transition);
+    }
+    .post-card__name:hover { color: var(--accent); }
+    .post-card__handle { font-size: 0.82rem; color: var(--text-3); }
+    .post-card__time { font-size: 0.78rem; color: var(--text-3); margin-left: auto; }
+
+    .post-card__retweet-banner {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        color: var(--text-3);
+        margin-bottom: 0.5rem;
+    }
+
+    .post-card__text {
+        font-size: 0.95rem;
+        line-height: 1.65;
+        color: var(--text);
+        margin-bottom: 0.75rem;
+        word-break: break-word;
+    }
+
+    .post-card__image {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        margin-bottom: 0.75rem;
+    }
+
+    /* ── Post action buttons ────────────────────────────────────────── */
+    .post-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.25rem;
+    }
+    .post-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 99px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-3);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-family: var(--font-body);
+        transition: color var(--transition), background var(--transition);
+        text-decoration: none;
+    }
+    .post-action svg { width: 17px; height: 17px; }
+
+    .post-action--like:hover    { color: #f43f5e; background: rgba(244,63,94,0.1); }
+    .post-action--like.liked    { color: #f43f5e; }
+    .post-action--retweet:hover { color: var(--success); background: rgba(16,185,129,0.1); }
+    .post-action--delete:hover  { color: var(--danger); background: rgba(244,63,94,0.1); }
+    .post-action--delete { margin-left: auto; }
+
+    /* ══════════════════════════════════════════════════════════════════
+       COMPOSE BOX — new post form
+       ══════════════════════════════════════════════════════════════════ */
+    .compose {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 0.875rem;
+    }
+    .compose__avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid var(--border);
+    }
+    .compose__form { flex: 1; }
+    .compose__textarea {
+        width: 100%;
+        background: transparent;
+        border: none;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 1rem;
+        resize: none;
+        outline: none;
+        min-height: 72px;
+        line-height: 1.6;
+    }
+    .compose__textarea::placeholder { color: var(--text-3); }
+    .compose__divider {
+        height: 1px;
+        background: var(--border);
+        margin: 0.75rem 0;
+    }
+    .compose__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .compose__file-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--text-3);
+        font-size: 0.82rem;
+        cursor: pointer;
+        padding: 0.3rem 0.6rem;
+        border-radius: 99px;
+        transition: color var(--transition), background var(--transition);
+    }
+    .compose__file-label:hover { color: var(--accent); background: var(--accent-dim); }
+    .compose__file-input { display: none; }
+    .compose__char-count {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-3);
+        padding: 0.25rem 0.6rem;
+        background: var(--card-hi);
+        border-radius: 99px;
+    }
+    .compose__char-count.warn { color: var(--warning); }
+    .compose__char-count.danger { color: var(--danger); }
+
+    /* ══════════════════════════════════════════════════════════════════
+       FORM ELEMENTS — app forms
+       ══════════════════════════════════════════════════════════════════ */
+    .form-field { margin-bottom: 1.1rem; }
+    .form-field label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-2);
+        margin-bottom: 0.4rem;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.7rem 0.9rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+    .form-control:focus {
+        border-color: var(--accent);
+        background: var(--card-hi);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .form-control::placeholder { color: var(--text-3); }
+    .form-control select { cursor: pointer; }
+
+    .field-err {
+        font-size: 0.78rem;
+        color: var(--danger);
+        margin-top: 0.3rem;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       SECTION HEADER — page titles
+       ══════════════════════════════════════════════════════════════════ */
+    .section-header {
+        padding: 1.25rem 1.25rem 1rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: sticky;
+        top: var(--nav-h);
+        z-index: 10;
+        background: rgba(7,8,15,0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .section-header h1 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+    }
+    .section-header .back-btn {
+        color: var(--text-2);
+        padding: 0.3rem;
+        border-radius: 99px;
+        transition: color var(--transition), background var(--transition);
+    }
+    .section-header .back-btn:hover { background: var(--card-hi); color: var(--text); }
+
+    /* ══════════════════════════════════════════════════════════════════
+       ALERTS — django messages
+       ══════════════════════════════════════════════════════════════════ */
+    .alert-bar {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        animation: slide-in 0.3s var(--transition) both;
+    }
+    @keyframes slide-in {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .alert-bar--success { background: rgba(16,185,129,0.1); border-bottom: 1px solid rgba(16,185,129,0.2); color: #6ee7b7; }
+    .alert-bar--error   { background: rgba(244,63,94,0.1); border-bottom: 1px solid rgba(244,63,94,0.2); color: #fca5a5; }
+    .alert-bar--warning { background: rgba(245,158,11,0.1); border-bottom: 1px solid rgba(245,158,11,0.2); color: #fcd34d; }
+    .alert-bar--info    { background: rgba(79,142,255,0.1); border-bottom: 1px solid rgba(79,142,255,0.2); color: #93c5fd; }
+    .alert-bar__close {
+        background: none;
+        border: none;
+        color: inherit;
+        opacity: 0.6;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0 0.25rem;
+        flex-shrink: 0;
+    }
+    .alert-bar__close:hover { opacity: 1; }
+
+    /* ══════════════════════════════════════════════════════════════════
+       AVATAR — utility
+       ══════════════════════════════════════════════════════════════════ */
+    .avatar {
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--border);
+        display: block;
+        flex-shrink: 0;
+    }
+    .avatar-sm  { width: 32px; height: 32px; }
+    .avatar-md  { width: 44px; height: 44px; }
+    .avatar-lg  { width: 64px; height: 64px; }
+    .avatar-xl  { width: 80px; height: 80px; }
+
+    /* ══════════════════════════════════════════════════════════════════
+       PAGINATION
+       ══════════════════════════════════════════════════════════════════ */
+    .pagination-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 1.5rem 1.25rem;
+        flex-wrap: wrap;
+    }
+    .page-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-xs);
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-2);
+        background: var(--card);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all var(--transition);
+        text-decoration: none;
+    }
+    .page-btn:hover:not(.disabled):not(.active) {
+        background: var(--card-hi);
+        border-color: var(--border-hi);
+        color: var(--text);
+    }
+    .page-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        cursor: default;
+    }
+    .page-btn.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+    .page-meta { font-size: 0.78rem; color: var(--text-3); margin-top: 0.5rem; text-align: center; }
+
+    /* ══════════════════════════════════════════════════════════════════
+       EMPTY STATE
+       ══════════════════════════════════════════════════════════════════ */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        color: var(--text-3);
+    }
+    .empty-state__icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        display: block;
+    }
+    .empty-state p { font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.25rem; }
+
+    /* ══════════════════════════════════════════════════════════════════
+       BADGE
+       ══════════════════════════════════════════════════════════════════ */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.15rem 0.55rem;
+        border-radius: 99px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+    }
+    .badge-primary { background: var(--accent-dim); color: var(--accent); }
+    .badge-success { background: rgba(16,185,129,0.12); color: var(--success); }
+    .badge-new     { background: rgba(79,142,255,0.15); color: var(--accent); }
+
+    /* ══════════════════════════════════════════════════════════════════
+       UTILITIES
+       ══════════════════════════════════════════════════════════════════ */
+    .text-accent  { color: var(--accent); }
+    .text-muted   { color: var(--text-2); }
+    .text-dim     { color: var(--text-3); }
+    .text-danger  { color: var(--danger); }
+    .text-success { color: var(--success); }
+    .font-display { font-family: var(--font-display); }
+    .divider      { height: 1px; background: var(--border); margin: 0; }
+    </style>
+
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-    {# ════════════════════════════════════════════════════════ NAVBAR ══════ #}
-    <div class="container-fluid" style="padding:0;">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <img src="{% static 'img/twitter-brands.svg' %}" width="30" height="30"
-                     class="d-inline-block align-top" alt="Logo">
-                UNET - Better X
-            </a>
+    {# ══════════════ NAVBAR ══════════════ #}
+    <nav class="topnav">
+        <a class="topnav__brand" href="{% url 'home' %}">UnetX</a>
 
-            <button class="navbar-toggler" type="button" data-toggle="collapse"
-                    data-target="#navbarContent" aria-controls="navbarContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarContent">
-                {# Barra de búsqueda global #}
-                <form class="form-inline my-2 my-lg-0 mr-auto" method="GET"
-                      action="{% url 'buscar_usuarios' %}">
-                    <input class="form-control mr-sm-2" type="search"
-                           placeholder="Buscar usuarios..." aria-label="Buscar" name="q"
-                           value="{{ request.GET.q|default:'' }}">
-                    <button class="btn btn-outline-light my-2 my-sm-0"
-                            type="submit" style="background-color:#383c44;">🔍</button>
-                </form>
-
-                {# Links de navegación #}
-                <div class="navbar-nav ml-2">
-                    <a href="{% url 'home' %}"
-                       class="btn btn-sm text-white my-1 mx-1"
-                       style="background-color:#383c44;">
-                        🏠 Inicio
-                    </a>
-                    <a href="{% url 'mentions' %}"
-                       class="btn btn-sm text-white my-1 mx-1"
-                       style="background-color:#383c44;">
-                        🔔 Menciones
-                    </a>
-                    <a href="{% url 'inbox' %}"
-                       class="btn btn-sm text-white my-1 mx-1"
-                       style="background-color:#383c44;">
-                        📥 Bandeja
-                    </a>
-                    <a href="{% url 'send_message' %}"
-                       class="btn btn-sm text-white my-1 mx-1"
-                       style="background-color:#383c44;">
-                        ✉️ Mensaje
-                    </a>
-
-                    {# Logout: usa POST por seguridad CSRF (Django 5.x requiere POST) #}
-                    <form method="post" action="{% url 'logout' %}" class="d-inline my-1 mx-1">
-                        {% csrf_token %}
-                        <button type="submit"
-                                class="btn btn-sm"
-                                style="background-color:#c0392b; color:white;">
-                            Salir
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </nav>
-    </div>
-
-    {# ════════════════════════════════════ MENSAJES FLASH (Django messages) ══ #}
-    {#                                                                           #}
-    {# Este bloque estaba AUSENTE en el layout original. Sin él, todos los      #}
-    {# messages.success / messages.error del backend nunca se mostraban al      #}
-    {# usuario, aunque sí se generaban.                                         #}
-    {#                                                                           #}
-    {% if messages %}
-    <div class="container-fluid px-3 pt-2" id="django-messages">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-1"
-             role="alert">
-            {# Mapeo de tags de Django a clases Bootstrap:                      #}
-            {# success→alert-success, error→alert-danger, warning→alert-warning #}
-            {# info→alert-info                                                   #}
-            {{ message }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar">
-                <span aria-hidden="true">&times;</span>
-            </button>
+        <div class="topnav__search">
+            <form method="GET" action="{% url 'buscar_usuarios' %}">
+                <span class="topnav__search-icon">
+                    <i class="fa fa-search"></i>
+                </span>
+                <input type="search" name="q" placeholder="Buscar usuarios..."
+                       value="{{ request.GET.q|default:'' }}" autocomplete="off">
+            </form>
         </div>
+
+        <div class="topnav__links">
+            <a href="{% url 'home' %}" class="nav-link">
+                <span class="icon">🏠</span>
+                <span class="label">Inicio</span>
+            </a>
+            <a href="{% url 'mentions' %}" class="nav-link">
+                <span class="icon">🔔</span>
+                <span class="label">Menciones</span>
+            </a>
+            <a href="{% url 'inbox' %}" class="nav-link">
+                <span class="icon">📥</span>
+                <span class="label">Bandeja</span>
+            </a>
+            <a href="{% url 'send_message' %}" class="nav-link">
+                <span class="icon">✉️</span>
+                <span class="label">Mensaje</span>
+            </a>
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="nav-link nav-link--danger">
+                    <span class="icon">↩</span>
+                    <span class="label">Salir</span>
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    {# ══════════════ FLASH MESSAGES ══════════════ #}
+    {% if messages %}
+    <div id="alert-container" style="position:fixed; top:var(--nav-h); left:0; right:0; z-index:200;">
+        {% for message in messages %}
+        {% if message.tags == 'error' %}
+        <div class="alert-bar alert-bar--error">
+            <span>⚠ {{ message }}</span>
+            <button class="alert-bar__close" onclick="this.parentElement.remove()">✕</button>
+        </div>
+        {% elif message.tags == 'warning' %}
+        <div class="alert-bar alert-bar--warning">
+            <span>⚡ {{ message }}</span>
+            <button class="alert-bar__close" onclick="this.parentElement.remove()">✕</button>
+        </div>
+        {% elif message.tags == 'success' %}
+        <div class="alert-bar alert-bar--success">
+            <span>✓ {{ message }}</span>
+            <button class="alert-bar__close" onclick="this.parentElement.remove()">✕</button>
+        </div>
+        {% else %}
+        <div class="alert-bar alert-bar--info">
+            <span>ℹ {{ message }}</span>
+            <button class="alert-bar__close" onclick="this.parentElement.remove()">✕</button>
+        </div>
+        {% endif %}
         {% endfor %}
     </div>
     {% endif %}
 
-    {# ════════════════════════════════════════════════ CONTENIDO PRINCIPAL ══ #}
+    {# ══════════════ PAGE CONTENT ══════════════ #}
     {% block content %}{% endblock content %}
-    {# El layout ya no tiene contenido placeholder (Tony Stark) en el bloque.  #}
-    {# Cada template hijo es responsable de su propio layout.                  #}
 
-    {# ════════════════════════════════════════════════════════ SCRIPTS ═══════#}
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-            crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-            crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-            crossorigin="anonymous"></script>
-    <script src="{% static 'js/script.js' %}"></script>
+    <script>
+    // Auto-dismiss alerts after 4s
+    setTimeout(() => {
+        const c = document.getElementById('alert-container');
+        if (c) c.style.transition = 'opacity 0.5s', c.style.opacity = '0',
+               setTimeout(() => c && c.remove(), 500);
+    }, 4000);
+    </script>
 
-    {# Bloque opcional para scripts específicos de cada página #}
     {% block extra_js %}{% endblock %}
-
 </body>
 </html>

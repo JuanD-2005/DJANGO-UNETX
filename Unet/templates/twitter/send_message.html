@@ -1,91 +1,86 @@
 {% extends 'twitter/layout.html' %}
-
 {% block title %}Enviar mensaje{% endblock %}
 
 {% block content %}
-<div class="container mt-5" style="max-width:600px;">
-    <div class="card shadow-sm">
-        <div class="card-header text-white font-weight-bold"
-             style="background-color:#383c44;">
-            ✉️ Enviar mensaje directo
-        </div>
-        <div class="card-body">
+<div class="page-shell" style="grid-template-columns:1fr;">
+<main class="main-content" style="border-right:none; max-width:600px; margin:0 auto; width:100%;">
 
-            {% if not following_users %}
-            {# Estado vacío: el usuario no sigue a nadie todavía. #}
-            <div class="text-center text-muted py-4">
-                <p style="font-size:2rem;">👤</p>
-                <p>Solo puedes enviar mensajes a usuarios que sigues.</p>
-                <a href="{% url 'buscar_usuarios' %}" class="btn text-white"
-                   style="background-color:#383c44; border-radius:20px;">
-                    Descubrir usuarios
-                </a>
-            </div>
-            {% else %}
-
-            <form method="POST">
-                {% csrf_token %}
-
-                <div class="form-group">
-                    <label for="receiver" class="font-weight-bold">
-                        Destinatario
-                    </label>
-                    <select name="receiver" id="receiver" class="form-control" required>
-                        <option value="">— Selecciona un usuario —</option>
-                        {% for u in following_users %}
-                        <option value="{{ u.id }}">
-                            @{{ u.username }}
-                            {% if u.first_name %}({{ u.first_name }}){% endif %}
-                        </option>
-                        {% endfor %}
-                    </select>
-                    <small class="form-text text-muted">
-                        Solo aparecen usuarios que sigues.
-                    </small>
-                </div>
-
-                <div class="form-group mt-3">
-                    <label for="content" class="font-weight-bold">Mensaje</label>
-                    <textarea name="content" id="content" class="form-control"
-                              rows="4" maxlength="500" required
-                              placeholder="Escribe tu mensaje..."></textarea>
-                    <div class="d-flex justify-content-end">
-                        <small class="text-muted" id="dm-char-count">500 caracteres restantes</small>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between mt-3">
-                    <a href="{% url 'inbox' %}"
-                       class="btn text-muted"
-                       style="border:1px solid #ccc; border-radius:20px;">
-                        Cancelar
-                    </a>
-                    <button type="submit" class="btn text-white"
-                            style="background-color:#383c44; border-radius:20px;
-                                   padding-left:2rem; padding-right:2rem;">
-                        Enviar
-                    </button>
-                </div>
-            </form>
-
-            {% endif %}
-        </div>
+    <div class="section-header">
+        <a href="{% url 'inbox' %}" class="back-btn">←</a>
+        <h1>Nuevo mensaje</h1>
     </div>
+
+    <div style="padding:1.5rem;">
+    {% if not following_users %}
+        <div class="empty-state">
+            <span class="empty-state__icon">👤</span>
+            <p>
+                Solo puedes enviar mensajes a usuarios que sigues.
+                <br>
+                <span style="font-size:0.82rem; color:var(--text-3);">
+                    Sigue a alguien primero para iniciar una conversación.
+                </span>
+            </p>
+            <a href="{% url 'buscar_usuarios' %}" class="btn btn-primary">
+                Descubrir usuarios
+            </a>
+        </div>
+    {% else %}
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-field">
+                <label>Destinatario</label>
+                <select name="receiver" class="form-control" required>
+                    <option value="">— Selecciona un usuario —</option>
+                    {% for u in following_users %}
+                    <option value="{{ u.id }}">
+                        @{{ u.username }}{% if u.first_name %} · {{ u.first_name }}{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                <div style="font-size:0.75rem; color:var(--text-3); margin-top:0.4rem;">
+                    Solo aparecen usuarios que sigues.
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label>Mensaje</label>
+                <textarea name="content" id="dm-content" class="form-control"
+                          rows="5" maxlength="500" required
+                          placeholder="Escribe tu mensaje..."
+                          style="resize:vertical;"></textarea>
+                <div style="display:flex; justify-content:flex-end; margin-top:0.4rem;">
+                    <span id="dm-counter"
+                          style="font-size:0.75rem; color:var(--text-3); font-weight:600;">
+                        500 restantes
+                    </span>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:0.5rem;">
+                <a href="{% url 'inbox' %}" class="btn btn-ghost">Cancelar</a>
+                <button type="submit" class="btn btn-gradient">Enviar mensaje</button>
+            </div>
+        </form>
+    {% endif %}
+    </div>
+
+</main>
 </div>
 {% endblock content %}
 
 {% block extra_js %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const textarea = document.getElementById("content");
-    const counter = document.getElementById("dm-char-count");
-    if (!textarea || !counter) return;
-
-    textarea.addEventListener("input", function () {
-      const remaining = 500 - textarea.value.length;
-      counter.textContent = remaining + " caracteres restantes";
-      counter.style.color = remaining < 50 ? "#c0392b" : "#657786";
+(function() {
+    const ta = document.getElementById('dm-content');
+    const c  = document.getElementById('dm-counter');
+    if (!ta || !c) return;
+    ta.addEventListener('input', function() {
+        const rem = 500 - ta.value.length;
+        c.textContent = rem + ' restantes';
+        c.style.color = rem < 50 ? 'var(--danger)' : rem < 100 ? 'var(--warning)' : 'var(--text-3)';
     });
-  });
+})();
 </script>
 {% endblock extra_js %}

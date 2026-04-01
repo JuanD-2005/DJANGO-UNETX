@@ -1,122 +1,60 @@
-{% extends 'twitter/layout.html' %}
-{% load static %}
-
+{% extends 'twitter/base_auth.html' %}
 {% block title %}Iniciar sesión{% endblock %}
 
-{# ─────────────────────────────────────────────────────────────────────────── #}
-{# login.html                                                                  #}
-{# CAMBIO: ahora extiende layout.html para heredar el bloque de messages y    #}
-{# los scripts de Bootstrap. El template original tenía su propio <body> con  #}
-{# clase login-page — conservamos el estilo visual pero dentro del layout.    #}
-{# ─────────────────────────────────────────────────────────────────────────── #}
-
 {% block content %}
-<style>
-  :root {
-    --primary-color: #1da1f2;
-    --primary-hover: #0d95e8;
-    --text-dark: #14171a;
-    --text-light: #657786;
-    --border-color: #ccd6dd;
-    --background-color: #f5f8fa;
-    --error-color: #e0245e;
-    --shadow-medium: 0 4px 12px rgba(0,0,0,0.15);
-  }
-  .login-wrap {
-    min-height: calc(100vh - 60px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--background-color);
-    padding: 2rem 1rem;
-  }
-  .login-container {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: var(--shadow-medium);
-    padding: 40px 35px;
-    width: 100%;
-    max-width: 420px;
-    transition: transform .3s ease, box-shadow .3s ease;
-  }
-  .login-container:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  }
-  .login-header { text-align:center; margin-bottom:30px; }
-  .login-logo {
-    width:80px; height:80px; border-radius:50%; object-fit:cover;
-    margin-bottom:15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-  .login-title { font-size:28px; font-weight:700; color:var(--text-dark); }
-  .login-subtitle { font-size:14px; color:var(--text-light); }
-  .input-wrapper { margin-bottom:20px; }
-  .input-wrapper label {
-    display:block; margin-bottom:8px; font-weight:600;
-    color:var(--text-dark); font-size:14px;
-  }
-  .input-wrapper input {
-    width:100%; padding:14px 16px; border:1px solid var(--border-color);
-    border-radius:8px; box-sizing:border-box; font-size:15px;
-    transition:all .3s ease; background:#fafbfc;
-  }
-  .input-wrapper input:focus {
-    outline:none; border-color:var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(29,161,242,0.1); background:#fff;
-  }
-  .login-btn {
-    width:100%; padding:14px; background:var(--primary-color);
-    border:none; color:#fff; border-radius:8px; font-size:16px;
-    font-weight:600; cursor:pointer; transition:all .3s ease;
-    box-shadow: 0 2px 4px rgba(29,161,242,0.3); margin-top:10px;
-  }
-  .login-btn:hover {
-    background:var(--primary-hover); transform:translateY(-2px);
-    box-shadow: 0 4px 8px rgba(29,161,242,0.4);
-  }
-  .login-footer {
-    text-align:center; margin-top:25px; font-size:14px;
-    padding-top:20px; border-top:1px solid #e6ecf0;
-  }
-  .login-link { color:var(--primary-color); text-decoration:none; font-weight:500; }
-  .login-link:hover { color:var(--primary-hover); text-decoration:underline; }
-</style>
+<h2 class="auth-heading">Bienvenido de vuelta</h2>
+<p class="auth-subtitle">Inicia sesión para continuar</p>
 
-<div class="login-wrap">
-  <div class="login-container">
-    <header class="login-header">
-      <img class="login-logo" src="{% static 'img/tab-icons.png' %}" alt="UnetX">
-      <h1 class="login-title">Inicia Sesión</h1>
-      <p class="login-subtitle">Accede a tu cuenta para continuar</p>
-    </header>
+<form method="post">
+    {% csrf_token %}
 
-    <form method="post">
-      {% csrf_token %}
-
-      <div class="input-wrapper">
+    <div class="field">
         <label>Usuario</label>
         {{ form.username }}
-      </div>
-      <div class="input-wrapper">
+    </div>
+    <div class="field">
         <label>Contraseña</label>
         {{ form.password }}
-      </div>
-
-      {# Errores del formulario de autenticación de Django #}
-      {% if form.errors %}
-      <div class="alert alert-danger py-2 small" role="alert">
-        ⚠️ Usuario o contraseña incorrectos. Inténtalo de nuevo.
-      </div>
-      {% endif %}
-
-      <button type="submit" class="login-btn">Iniciar Sesión</button>
-    </form>
-
-    <div class="login-footer">
-      <a href="#" class="login-link">¿Olvidaste tu contraseña?</a>
-      <span class="mx-2 text-muted">·</span>
-      <a href="{% url 'register' %}" class="login-link">Regístrate</a>
     </div>
-  </div>
+
+    {% if form.errors %}
+    <div class="alert-err">
+        ⚠ Usuario o contraseña incorrectos.
+    </div>
+    {% endif %}
+
+    <button type="submit" class="btn-primary-auth">Iniciar sesión</button>
+</form>
+
+<div class="auth-footer">
+    <a href="#">¿Olvidaste tu contraseña?</a>
+    <span style="margin:0 0.75rem; color:var(--text-3);">·</span>
+    <a href="{% url 'register' %}">Crear cuenta</a>
 </div>
-{% endblock content %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Apply input classes to Django-rendered form fields
+document.querySelectorAll('input').forEach(el => {
+    el.style.width = '100%';
+    el.style.padding = '0.8rem 1rem';
+    el.style.background = 'var(--card)';
+    el.style.border = '1px solid var(--border)';
+    el.style.borderRadius = '10px';
+    el.style.color = 'var(--text)';
+    el.style.fontSize = '0.95rem';
+    el.style.outline = 'none';
+    el.style.fontFamily = 'var(--font-body)';
+    el.style.transition = 'border-color 0.2s, box-shadow 0.2s';
+    el.addEventListener('focus', () => {
+        el.style.borderColor = 'var(--accent)';
+        el.style.boxShadow = '0 0 0 3px var(--accent-dim)';
+    });
+    el.addEventListener('blur', () => {
+        el.style.borderColor = 'var(--border)';
+        el.style.boxShadow = 'none';
+    });
+});
+</script>
+{% endblock extra_js %}
